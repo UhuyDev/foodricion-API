@@ -1,4 +1,5 @@
 import os
+import uvicorn
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from dotenv import load_dotenv
@@ -194,3 +195,6 @@ async def create_chatbot_history(
     db.commit()
     db.refresh(db_chatbot)
     return db_chatbot
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
