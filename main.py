@@ -1,7 +1,8 @@
 import os
-import uvicorn
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
+
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -9,7 +10,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from starlette.responses import RedirectResponse
+
 import models
 from database import engine, Sessionlocal
 
@@ -109,6 +110,11 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
+@app.get("/", status_code=status.HTTP_200_OK)
+def welcome():
+    return "foodricion-api is working"
+
+
 @app.post("/register", response_model=UserInResponse)
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
@@ -120,11 +126,6 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     return UserInResponse(fullname=db_user.fullname, email=db_user.email)
-
-
-@app.get("/", status_code=status.HTTP_200_OK)
-def github():
-    return RedirectResponse("https://github.com/UhuyDev")
 
 
 @app.post("/token")
@@ -181,9 +182,9 @@ async def read_chatbot_history(db: Session = Depends(get_db), current_user: mode
 
 @app.post("/chatbot-history", status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_user)])
 async def create_chatbot_history(
-    chatbot_data: ChatbotHistoryCreate,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+        chatbot_data: ChatbotHistoryCreate,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_user)
 ):
     # Create a new chatbot history entry with the current user's user_id
     db_chatbot = models.ChatbotConversation(
@@ -195,6 +196,7 @@ async def create_chatbot_history(
     db.commit()
     db.refresh(db_chatbot)
     return db_chatbot
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

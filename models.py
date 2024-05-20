@@ -37,5 +37,5 @@ class ChatbotConversation(Base):
     conversation_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
     timestamp = Column(DateTime, default=datetime.now(timezone.utc))
-    message = Column(String)
-    response = Column(String)
+    message = Column(String(255))
+    response = Column(String(255))
