@@ -1,136 +1,138 @@
-# FastAPI OpenAPI Specification
+Certainly! Here's a simplified API documentation based on the provided OpenAPI specification:
 
-## Endpoints
+---
 
-### Register User
+# FastAPI API Documentation
+
+## Register User
+
+**Endpoint:** `/register`
 
 - **Method:** POST
-- **Summary:** Register User
-- **Operation ID:** register_user_register_post
+- **Summary:** Register a new user.
 - **Request Body:**
   - Content-Type: application/json
-  - Schema: [UserCreate](#usercreate)
-  - Required: Yes
+  - Schema: UserCreate
+    - full_name (string, required): Full Name
+    - email (string, required): Email
+    - password (string, required): Password
 - **Responses:**
   - 200: Successful Response
     - Content-Type: application/json
-    - Schema: [UserInResponse](#userinresponse)
+    - Schema: UserInResponse
+      - fullname (string, required): Fullname
+      - email (string, required): Email
   - 422: Validation Error
     - Content-Type: application/json
-    - Schema: [HTTPValidationError](#httpvalidationerror)
+    - Schema: HTTPValidationError
 
-### Github
+## Github
+
+**Endpoint:** `/`
 
 - **Method:** GET
-- **Summary:** Github
-- **Operation ID:** github__get
-- **Responses:**
-  - 200: Successful Response
-    - Content-Type: application/json
-    - Schema: (empty)
+- **Summary:** Retrieve data from Github.
 
-### Login For Access Token
+## Login For Access Token
+
+**Endpoint:** `/token`
 
 - **Method:** POST
-- **Summary:** Login For Access Token
-- **Operation ID:** login_for_access_token_token_post
+- **Summary:** Login to get an access token.
 - **Request Body:**
   - Content-Type: application/x-www-form-urlencoded
-  - Schema: [Body_login_for_access_token_token_post](#body_login_for_access_token_token_post)
-  - Required: Yes
+  - Schema: Body_login_for_access_token_token_post
+    - grant_type (string or null): Grant Type
+    - username (string, required): Username
+    - password (string, required): Password
+    - scope (string, default ""): Scope
+    - client_id (string or null): Client Id
+    - client_secret (string or null): Client Secret
 - **Responses:**
   - 200: Successful Response
     - Content-Type: application/json
-    - Schema: (empty)
   - 422: Validation Error
     - Content-Type: application/json
-    - Schema: [HTTPValidationError](#httpvalidationerror)
+    - Schema: HTTPValidationError
 
-### Read Current User
+## Read Current User
+
+**Endpoint:** `/me`
 
 - **Method:** GET
-- **Summary:** Read Current User
-- **Operation ID:** read_current_user_me_get
+- **Summary:** Read current user details.
 - **Responses:**
   - 200: Successful Response
     - Content-Type: application/json
-    - Schema: [UserInResponse](#userinresponse)
-- **Security:**
-  - OAuth2PasswordBearer
+    - Schema: UserInResponse
+      - fullname (string, required): Fullname
+      - email (string, required): Email
+  - **Security:** OAuth2PasswordBearer
 
-### Read Nutrition All
+## Read Nutrition Data
 
-- **Method:** GET
-- **Summary:** Read Nutrition All
-- **Operation ID:** read_nutrition_all_nutrition_get
-- **Responses:**
-  - 200: Successful Response
-    - Content-Type: application/json
-    - Schema: (empty)
-
-### Read Nutrition Name
+**Endpoint:** `/nutrition`
 
 - **Method:** GET
-- **Summary:** Read Nutrition Name
-- **Operation ID:** read_nutrition_name_nutrition__food_name__get
+- **Summary:** Read nutrition data for all items.
+
+## Read Nutrition by Name
+
+**Endpoint:** `/nutrition/{food_name}`
+
+- **Method:** GET
+- **Summary:** Read nutrition data for a specific food item.
 - **Parameters:**
   - food_name (path, required, string): Food Name
 - **Responses:**
   - 200: Successful Response
     - Content-Type: application/json
-    - Schema: (empty)
   - 422: Validation Error
     - Content-Type: application/json
-    - Schema: [HTTPValidationError](#httpvalidationerror)
+    - Schema: HTTPValidationError
 
-### Read Chatbot History
+## Read Chatbot History
+
+**Endpoint:** `/chatbot-history`
 
 - **Method:** GET
-- **Summary:** Read Chatbot History
-- **Operation ID:** read_chatbot_history_chatbot_history_get
+- **Summary:** Read chatbot conversation history.
 - **Responses:**
   - 200: Successful Response
     - Content-Type: application/json
-    - Schema: (empty)
-- **Security:**
-  - OAuth2PasswordBearer
-
-### Create Chatbot History
-
+  - **Security:** OAuth2PasswordBearer
 - **Method:** POST
-- **Summary:** Create Chatbot History
-- **Operation ID:** create_chatbot_history_chatbot_history_post
-- **Request Body:**
-  - Content-Type: application/json
-  - Schema: [ChatbotHistoryCreate](#chatbothistorycreate)
-  - Required: Yes
-- **Responses:**
-  - 201: Successful Response
+  - **Summary:** Create a new entry in chatbot history.
+  - **Request Body:**
     - Content-Type: application/json
-    - Schema: (empty)
-  - 422: Validation Error
-    - Content-Type: application/json
-    - Schema: [HTTPValidationError](#httpvalidationerror)
-- **Security:**
-  - OAuth2PasswordBearer
+    - Schema: ChatbotHistoryCreate
+      - message (string, required): Message
+      - response (string, required): Response
+  - **Responses:**
+    - 201: Successful Response
+      - Content-Type: application/json
+    - 422: Validation Error
+      - Content-Type: application/json
+      - Schema: HTTPValidationError
+    - **Security:** OAuth2PasswordBearer
 
 ## Components
 
 ### Schemas
 
-- **UserCreate:** [UserCreate](#usercreate)
+- UserCreate:
   - full_name (string, required): Full Name
   - email (string, required): Email
   - password (string, required): Password
 
-- **UserInResponse:** [UserInResponse](#userinresponse)
+- UserInResponse:
   - fullname (string, required): Fullname
   - email (string, required): Email
 
-- **HTTPValidationError:** [HTTPValidationError](#httpvalidationerror)
+- HTTPValidationError:
   - detail (array of ValidationError): Detail
 
-- **Body_login_for_access_token_token_post:** [Body_login_for_access_token_token_post](#body_login_for_access_token_token_post)
+- Body_login_for_access_token_token_post:
   - grant_type (string or null): Grant Type
   - username (string, required): Username
   - password (string, required): Password
@@ -138,19 +140,21 @@
   - client_id (string or null): Client Id
   - client_secret (string or null): Client Secret
 
-- **ChatbotHistoryCreate:** [ChatbotHistoryCreate](#chatbothistorycreate)
+- ChatbotHistoryCreate:
   - message (string, required): Message
   - response (string, required): Response
 
-- **ValidationError:** [ValidationError](#validationerror)
+- ValidationError:
   - loc (array of string or integer, required): Location
   - msg (string, required): Message
   - type (string, required): Error Type
 
 ### Security Schemes
 
-- **OAuth2PasswordBearer:**
+- OAuth2PasswordBearer:
   - Type: oauth2
   - Flow: password
   - Token URL: token
   - Scopes: {}
+
+---
