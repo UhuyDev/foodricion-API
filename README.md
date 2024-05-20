@@ -31,7 +31,7 @@ Certainly! Here's a simplified API documentation based on the provided OpenAPI s
 **Endpoint:** `/`
 
 - **Method:** GET
-- **Summary:** Retrieve data from Github.
+- **Summary:** Redirect To Our Github.
 
 ## Login For Access Token
 
