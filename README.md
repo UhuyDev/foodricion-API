@@ -1,7 +1,3 @@
-Certainly! Here's a simplified API documentation based on the provided OpenAPI specification:
-
----
-
 # FastAPI API Documentation
 
 ## Register User
