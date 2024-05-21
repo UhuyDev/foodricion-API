@@ -37,7 +37,7 @@ class UserInResponse(BaseModel):
     email: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Define Pydantic model for nutrition information
 class NutritionBase(BaseModel):
