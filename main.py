@@ -1,7 +1,6 @@
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
 
 import uvicorn
 from dotenv import load_dotenv
@@ -17,7 +16,7 @@ from database import engine, Sessionlocal
 
 # Load environment variables from a .env file
 load_dotenv()
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -27,21 +26,18 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Define OAuth2 scheme for obtaining tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
 # Define Pydantic models for user creation and response
 class UserCreate(BaseModel):
     full_name: str
     email: str
     password: str
 
-
 class UserInResponse(BaseModel):
     fullname: str
     email: str
 
     class Config:
-        from_attributes = True
-
+        orm_mode = True
 
 # Define Pydantic model for nutrition information
 class NutritionBase(BaseModel):
@@ -51,12 +47,10 @@ class NutritionBase(BaseModel):
     food_type: str
     food_calories: float
 
-
 # Define Pydantic model for chatbot history creation
 class ChatbotHistoryCreate(BaseModel):
     message: str
     response: str
-
 
 # Function to create an access token for a user
 def create_access_token(data: dict, expires_delta: timedelta):
@@ -66,38 +60,27 @@ def create_access_token(data: dict, expires_delta: timedelta):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 # Function to verify a plain password against a hashed password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-
 # Function to authenticate a user by email and password
-def authenticate_user(email: str, password: str):
-    user = get_user_by_email(email)
-    if not user or not verify_password(password, user.password_hash):
-        return None
-    return user
-
-
-# Function to retrieve a user from the database by email
-def get_user_by_email(email: str):
-    db = Sessionlocal()
+def authenticate_user(email: str, password: str, db: Session):
     user = db.query(models.User).filter(models.User.email == email).first()
-    db.close()
-    return user
+    if user and verify_password(password, user.password_hash):
+        return user
+    return None
 
-
-# Function to retrieve a user from the database by user ID
-def get_user_by_id(user_id: str):
+# Dependency to get a database session
+def get_db():
     db = Sessionlocal()
-    user = db.query(models.User).filter(models.User.user_id == user_id).first()
-    db.close()
-    return user
-
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Dependency to get the current user from the token
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -110,11 +93,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = get_user_by_id(user_id)
+
+    user = db.query(models.User).filter(models.User.user_id == user_id).first()
     if user is None:
         raise credentials_exception
     return user
-
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -122,25 +105,10 @@ app = FastAPI()
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
 
-
-# Dependency to get a database session
-def get_db():
-    db = Sessionlocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-# Annotate dependency for database session
-db_dependency = Annotated[Session, Depends(get_db)]
-
-
 # Root endpoint to check if the API is working
 @app.get("/", status_code=status.HTTP_200_OK)
 def welcome():
     return "foodricion-api is working"
-
 
 # Endpoint to register a new user
 @app.post("/register", response_model=UserInResponse)
@@ -160,11 +128,10 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return UserInResponse(fullname=db_user.fullname, email=db_user.email)
 
-
 # Endpoint to obtain an access token
 @app.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -177,54 +144,38 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-
 # Endpoint to get the current authenticated user's information
 @app.get("/me", response_model=UserInResponse)
 async def read_current_user(current_user: models.User = Depends(get_current_user)):
     return UserInResponse(fullname=current_user.fullname, email=current_user.email)
 
-
 # Endpoint to get all nutrition data
 @app.get("/nutrition", status_code=status.HTTP_200_OK)
-async def read_nutrition_all(db: db_dependency):
+async def read_nutrition_all(db: Session = Depends(get_db)):
     nutrition_all = db.query(models.Nutrition).all()
     if not nutrition_all:
         raise HTTPException(status_code=404, detail='Nutrition data not found')
     return nutrition_all
 
-
 # Endpoint to get nutrition data by food name
 @app.get("/nutrition/{food_name}", status_code=status.HTTP_200_OK)
-async def read_nutrition_name(food_name: str, db: db_dependency):
+async def read_nutrition_name(food_name: str, db: Session = Depends(get_db)):
     nutrition_name = db.query(models.Nutrition).filter(models.Nutrition.food_name == food_name).first()
     if not nutrition_name:
         raise HTTPException(status_code=404, detail='Nutrition data not found')
     return nutrition_name
 
-
 # Endpoint to get chatbot history for the current user
-@app.get("/chatbot-history", status_code=status.HTTP_200_OK, dependencies=[Depends(get_current_user)])
-async def read_chatbot_history(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    user_id = current_user.user_id
-
-    stmt = (db.query(models.ChatbotConversation)
-            .filter(models.ChatbotConversation.user_id == user_id)
-            .order_by(models.ChatbotConversation.timestamp.desc()))
-    chatbot_history = stmt.all()
-
+@app.get("/chatbot-history", status_code=status.HTTP_200_OK)
+async def read_chatbot_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    chatbot_history = db.query(models.ChatbotConversation).filter(models.ChatbotConversation.user_id == current_user.user_id).order_by(models.ChatbotConversation.timestamp.desc()).all()
     if not chatbot_history:
         raise HTTPException(status_code=404, detail='Chatbot history not found for this user')
-
     return chatbot_history
 
-
 # Endpoint to create a new chatbot history entry
-@app.post("/chatbot-history", status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_user)])
-async def create_chatbot_history(
-        chatbot_data: ChatbotHistoryCreate,
-        db: Session = Depends(get_db),
-        current_user: models.User = Depends(get_current_user)
-):
+@app.post("/chatbot-history", status_code=status.HTTP_201_CREATED)
+async def create_chatbot_history(chatbot_data: ChatbotHistoryCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     db_chatbot = models.ChatbotConversation(
         message=chatbot_data.message,
         response=chatbot_data.response,
@@ -234,7 +185,6 @@ async def create_chatbot_history(
     db.commit()
     db.refresh(db_chatbot)
     return db_chatbot
-
 
 # Run the FastAPI application with Uvicorn
 if __name__ == "__main__":
