@@ -25,11 +25,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Define OAuth2 scheme for obtaining tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 # Define Pydantic models for user creation and response
 class UserCreate(BaseModel):
     full_name: str
     email: str
     password: str
+
 
 class UserInResponse(BaseModel):
     fullname: str
@@ -38,18 +40,16 @@ class UserInResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# Define Pydantic model for nutrition information
-class NutritionBase(BaseModel):
-    food_id: int
-    food_image: str
-    food_name: str
-    food_type: str
-    food_calories: float
 
 # Define Pydantic model for chatbot history creation
 class ChatbotHistoryCreate(BaseModel):
     message: str
     response: str
+
+
+class BookmarkCreate(BaseModel):
+    food_id: int
+
 
 # Function to create an access token for a user
 def create_access_token(data: dict, expires_delta: timedelta):
@@ -59,9 +59,11 @@ def create_access_token(data: dict, expires_delta: timedelta):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 # Function to verify a plain password against a hashed password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 # Function to authenticate a user by email and password
 def authenticate_user(email: str, password: str, db: Session):
@@ -70,6 +72,7 @@ def authenticate_user(email: str, password: str, db: Session):
         return user
     return None
 
+
 # Dependency to get a database session
 def get_db():
     db = Sessionlocal()
@@ -77,6 +80,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 # Dependency to get the current user from the token
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -98,16 +102,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
+
 # Initialize FastAPI application
 app = FastAPI()
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
 
+
 # Root endpoint to check if the API is working
 @app.get("/", status_code=status.HTTP_200_OK)
 def welcome():
     return "foodricion-api is working"
+
 
 # Endpoint to register a new user
 @app.post("/register", response_model=UserInResponse)
@@ -127,6 +134,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return UserInResponse(fullname=db_user.fullname, email=db_user.email)
 
+
 # Endpoint to obtain an access token
 @app.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -143,10 +151,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 # Endpoint to get the current authenticated user's information
 @app.get("/me", response_model=UserInResponse)
 async def read_current_user(current_user: models.User = Depends(get_current_user)):
     return UserInResponse(fullname=current_user.fullname, email=current_user.email)
+
 
 # Endpoint to get all nutrition data
 @app.get("/nutrition", status_code=status.HTTP_200_OK)
@@ -156,6 +166,7 @@ async def read_nutrition_all(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail='Nutrition data not found')
     return nutrition_all
 
+
 # Endpoint to get nutrition data by food name
 @app.get("/nutrition/{food_name}", status_code=status.HTTP_200_OK)
 async def read_nutrition_name(food_name: str, db: Session = Depends(get_db)):
@@ -164,17 +175,22 @@ async def read_nutrition_name(food_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail='Nutrition data not found')
     return nutrition_name
 
+
 # Endpoint to get chatbot history for the current user
 @app.get("/chatbot-history", status_code=status.HTTP_200_OK)
 async def read_chatbot_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    chatbot_history = db.query(models.ChatbotConversation).filter(models.ChatbotConversation.user_id == current_user.user_id).order_by(models.ChatbotConversation.timestamp.desc()).all()
+    chatbot_history = db.query(models.ChatbotConversation).filter(
+        models.ChatbotConversation.user_id == current_user.user_id).order_by(
+        models.ChatbotConversation.timestamp.desc()).all()
     if not chatbot_history:
         raise HTTPException(status_code=404, detail='Chatbot history not found for this user')
     return chatbot_history
 
+
 # Endpoint to create a new chatbot history entry
 @app.post("/chatbot-history", status_code=status.HTTP_201_CREATED)
-async def create_chatbot_history(chatbot_data: ChatbotHistoryCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def create_chatbot_history(chatbot_data: ChatbotHistoryCreate,
+                                 current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     db_chatbot = models.ChatbotConversation(
         message=chatbot_data.message,
         response=chatbot_data.response,
@@ -184,6 +200,38 @@ async def create_chatbot_history(chatbot_data: ChatbotHistoryCreate, current_use
     db.commit()
     db.refresh(db_chatbot)
     return db_chatbot
+
+
+# Endpoint to get all bookmarks for the current user
+@app.get("/bookmarks", status_code=status.HTTP_200_OK)
+async def get_bookmarks(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    bookmarks = db.query(models.BookmarkedNutrition).filter(
+        models.BookmarkedNutrition.user_id == current_user.user_id).all()
+    if not bookmarks:
+        raise HTTPException(status_code=404, detail='Bookmarks not found for this user')
+    return bookmarks
+
+
+# Endpoint to create a new bookmark for the current user
+@app.post("/bookmarks", status_code=status.HTTP_201_CREATED)
+async def create_bookmark(bookmark_data: BookmarkCreate,
+                          current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    existing_bookmark = db.query(models.BookmarkedNutrition).filter(
+        models.BookmarkedNutrition.user_id == current_user.user_id,
+        models.BookmarkedNutrition.food_id == bookmark_data.food_id
+    ).first()
+    if existing_bookmark:
+        raise HTTPException(status_code=400, detail='Bookmark already exists for this food item')
+
+    db_bookmark = models.BookmarkedNutrition(
+        user_id=current_user.user_id,
+        food_id=bookmark_data.food_id
+    )
+    db.add(db_bookmark)
+    db.commit()
+    db.refresh(db_bookmark)
+    return db_bookmark
+
 
 # Run the FastAPI application with Uvicorn
 if __name__ == "__main__":
