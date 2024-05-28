@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
+
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, status
@@ -31,6 +32,16 @@ class UserCreate(BaseModel):
     full_name: str
     email: str
     password: str
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class ProfileUpdateRequest(BaseModel):
+    full_name: str
+    email: str
 
 
 class UserInResponse(BaseModel):
@@ -156,6 +167,45 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/me", response_model=UserInResponse)
 async def read_current_user(current_user: models.User = Depends(get_current_user)):
     return UserInResponse(fullname=current_user.fullname, email=current_user.email)
+
+
+@app.post("/me/update-profile", status_code=status.HTTP_200_OK)
+async def update_profile(profile_update_request: ProfileUpdateRequest,
+                         current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Check if the new email is already registered to another user
+    if current_user.email != profile_update_request.email:
+        existing_user = db.query(models.User).filter(models.User.email == profile_update_request.email).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Update the user's full name and email in the database
+    current_user.fullname = profile_update_request.full_name
+    current_user.email = profile_update_request.email
+    db.commit()
+    db.refresh(current_user)
+
+    return {"msg": "Profile updated successfully", "full_name": current_user.fullname, "email": current_user.email}
+
+
+@app.post("/me/change-password", status_code=status.HTTP_200_OK)
+async def change_password(password_change_request: PasswordChangeRequest,
+                          current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Verify the old password
+    if not verify_password(password_change_request.old_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Old password is incorrect"
+        )
+
+    # Hash the new password
+    new_hashed_password = pwd_context.hash(password_change_request.new_password)
+
+    # Update the user's password in the database
+    current_user.password_hash = new_hashed_password
+    db.commit()
+    db.refresh(current_user)
+
+    return {"msg": "Password changed successfully"}
 
 
 # Endpoint to get all nutrition data
