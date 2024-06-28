@@ -7,9 +7,11 @@ from utils.Security import get_current_user, verify_password, pwd_context
 
 UserRouter = APIRouter()
 
+
 @UserRouter.get("/me", response_model=UserCreateResponse)
 async def read_current_user(current_user: User = Depends(get_current_user)):
     return UserCreateResponse(fullname=current_user.fullname, email=current_user.email)
+
 
 @UserRouter.post("/me/update-profile", status_code=status.HTTP_200_OK)
 async def update_profile(profile_update_request: ProfileUpdateRequest,
@@ -24,6 +26,7 @@ async def update_profile(profile_update_request: ProfileUpdateRequest,
     db.commit()
     db.refresh(current_user)
     return {"msg": "Profile updated successfully", "full_name": current_user.fullname, "email": current_user.email}
+
 
 @UserRouter.post("/me/change-password", status_code=status.HTTP_200_OK)
 async def change_password(password_change_request: PasswordChangeRequest,

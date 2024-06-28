@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, CHAR
+
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, CHAR
+
 from .Base import Base
+
 
 class BookmarkNutrition(Base):
     __tablename__ = 'nutrition_bookmark'

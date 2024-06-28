@@ -4,3 +4,5 @@ from .PasswordChangeRequest import PasswordChangeRequest
 from .ProfileUpdateRequest import ProfileUpdateRequest
 from .UserCreateRequest import UserCreateRequest
 from .UserCreateResponse import UserCreateResponse
+from .ForgotPasswordRequest import ForgotPasswordRequest
+from .OTPVerificationRequest import OTPVerificationRequest

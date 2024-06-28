@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, CHAR
+from sqlalchemy import Column, Integer, String, Float
+
 from .Base import Base
+
 
 class Nutrition(Base):
     __tablename__ = 'nutrition_table'

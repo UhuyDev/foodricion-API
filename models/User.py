@@ -1,7 +1,10 @@
 import uuid
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, CHAR
 from datetime import datetime, timezone
+
+from sqlalchemy import Column, String, DateTime, CHAR
+
 from .Base import Base
+
 
 class User(Base):
     __tablename__ = "users"

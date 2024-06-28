@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr
 
 
-class ProfileUpdateRequest(BaseModel):
-    full_name: str
+class ForgotPasswordRequest(BaseModel):
     email: EmailStr

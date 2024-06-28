@@ -10,6 +10,7 @@ from utils.Security import create_access_token, authenticate_user, pwd_context, 
 
 AuthRouter = APIRouter()
 
+
 @AuthRouter.post("/register", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -25,12 +26,13 @@ async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    
-    return {    
-        "code" : status.HTTP_201_CREATED,
-        "message" : "Registration success",
-        "data" : UserCreateResponse(fullname=db_user.fullname, email=db_user.email)
+
+    return {
+        "code": status.HTTP_201_CREATED,
+        "message": "Registration success",
+        "data": UserCreateResponse(fullname=db_user.fullname, email=db_user.email)
     }
+
 
 @AuthRouter.post("/login")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -47,8 +49,8 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": str(user.user_id)}, expires_delta=tdelta
     )
     return {
-        "code" : status.HTTP_200_OK,
-        "message" : "Login success",
-        "token" : access_token,
-        "expires" : tnow
+        "code": status.HTTP_200_OK,
+        "message": "Login success",
+        "access_token": access_token,
+        "expires": tnow
     }

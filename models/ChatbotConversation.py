@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, CHAR
+
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CHAR
+
 from .Base import Base
+
 
 class ChatbotConversation(Base):
     __tablename__ = 'chatbot_conversations'
