@@ -3,5 +3,5 @@ from pydantic import BaseModel, EmailStr
 
 class OTPVerificationRequest(BaseModel):
     email: EmailStr
-    otp: int
+    otp: str
     new_password: str
