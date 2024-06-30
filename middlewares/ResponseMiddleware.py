@@ -22,16 +22,17 @@ class ResponseMiddleware(BaseHTTPMiddleware):
             async for chunk in response.body_iterator:
                 response_body += chunk
 
+            print(response.status_code)
             try:
                 response_json = json.loads(response_body.decode('utf-8'))
             except json.JSONDecodeError:
                 # If the response is not JSON, return it as is
                 return response
 
-            if response.status_code == 200:
+            if response.status_code == 200 or response.status_code == 201:
                 formatted_response = response_json
             else:
-                detail = response_json.get('detail', 'Unknown error')
+                detail = response_json.get('detail')
                 if isinstance(detail, str):
                     message = detail
                 else:

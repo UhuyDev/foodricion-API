@@ -11,7 +11,7 @@ from utils.Security import create_access_token, authenticate_user, pwd_context, 
 AuthRouter = APIRouter()
 
 
-@AuthRouter.post("/register", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
+@AuthRouter.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
