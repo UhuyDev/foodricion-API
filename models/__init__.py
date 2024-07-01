@@ -4,3 +4,4 @@ from .ChatbotConversation import ChatbotConversation
 from .Nutrition import Nutrition
 from .BookmarkNutrition import BookmarkNutrition
 from .OTP import OTP
+from .Token import Token

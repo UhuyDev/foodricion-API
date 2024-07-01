@@ -33,8 +33,16 @@ def delete_expired_otps():
         db.commit()
 
 
+# Function For Automatically Delete Expired Refresh Tokens On Database
+def delete_expired_refresh_tokens():
+    with Sessionlocal() as db:
+        db.query(models.Token).filter(models.Token.expires_at <= datetime.now(timezone.utc)).delete()
+        db.commit()
+
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(delete_expired_otps, IntervalTrigger(minutes=1))
+scheduler.add_job(delete_expired_refresh_tokens, IntervalTrigger(minutes=1))
 
 
 @app.on_event("startup")
@@ -54,4 +62,4 @@ def welcome():
 
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
