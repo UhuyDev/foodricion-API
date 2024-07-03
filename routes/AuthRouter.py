@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,7 +10,6 @@ from database.dtos import UserCreateRequest, UserCreateResponse
 from models import User, Token
 from utils.Security import create_access_token, create_refresh_token, authenticate_user, verify_refresh_token, \
     pwd_context, ACCESS_TOKEN_EXPIRE_MINUTES
-import time
 
 AuthRouter = APIRouter()
 
@@ -49,18 +48,19 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     db.query(Token).filter(Token.user_id == user.user_id).delete()
     db.commit()
-    tdelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = datetime.now(timezone.utc) + tdelta
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": str(user.user_id)}, expires_delta=tdelta
+        data={"sub": str(user.user_id)}, expires_delta=access_token_expires
     )
     refresh_token = create_refresh_token(user.user_id, db)
     return {
         "code": status.HTTP_200_OK,
         "message": "Login success",
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expires": int(expire.timestamp())
+        "data": {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        }
     }
 
 
@@ -73,14 +73,15 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
             detail="Invalid or expired refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    tdelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = datetime.now(timezone.utc) + tdelta
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": str(db_token.user_id)}, expires_delta=tdelta
+        data={"sub": str(db_token.user_id)}, expires_delta=access_token_expires
     )
     return {
         "code": status.HTTP_200_OK,
         "message": "Token refresh success",
-        "access_token": access_token,
-        "expires": int(expire.timestamp())
+        "data": {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
     }

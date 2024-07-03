@@ -26,17 +26,20 @@ app.include_router(routes.OTPRouter)
 app.add_middleware(ResponseMiddleware)
 
 
-# Function For Automatically Delete Expired OTP On Database
+def datetime_to_timestamp(dt):
+    return int(dt.timestamp())
+
+
 def delete_expired_otps():
     with Sessionlocal() as db:
-        db.query(models.OTP).filter(models.OTP.expiry_at <= datetime.now(timezone.utc)).delete()
+        db.query(models.OTP).filter(models.OTP.expiry_at <= datetime_to_timestamp(datetime.now(timezone.utc))).delete()
         db.commit()
 
 
-# Function For Automatically Delete Expired Refresh Tokens On Database
 def delete_expired_refresh_tokens():
     with Sessionlocal() as db:
-        db.query(models.Token).filter(models.Token.expires_at <= datetime.now(timezone.utc)).delete()
+        db.query(models.Token).filter(
+            models.Token.expires_at <= datetime_to_timestamp(datetime.now(timezone.utc))).delete()
         db.commit()
 
 
