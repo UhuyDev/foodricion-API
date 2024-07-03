@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.Engine import get_db
-from database.dtos import UserCreateResponse, ProfileUpdateRequest, PasswordChangeRequest
+from database.dtos import UserCreateResponse, ProfileUpdateRequest, PasswordChangeRequest, APIResponse
 from models import User
 from utils.Security import get_current_user, verify_password, pwd_context
 
@@ -25,7 +25,15 @@ async def update_profile(profile_update_request: ProfileUpdateRequest,
     current_user.email = profile_update_request.email
     db.commit()
     db.refresh(current_user)
-    return {"msg": "Profile updated successfully", "full_name": current_user.fullname, "email": current_user.email}
+    
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Profile updated successfully",
+        data = {
+            "email": current_user.email,
+            "fullname": current_user.fullname
+        }
+    )
 
 
 @UserRouter.post("/me/change-password", status_code=status.HTTP_200_OK)
@@ -38,4 +46,8 @@ async def change_password(password_change_request: PasswordChangeRequest,
     current_user.password_hash = new_hashed_password
     db.commit()
     db.refresh(current_user)
-    return {"msg": "Password changed successfully"}
+    
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Password changed successfully"
+    ) 

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database.Engine import get_db
-from database.dtos import ForgotPasswordRequest, OTPVerificationRequest
+from database.dtos import ForgotPasswordRequest, OTPVerificationRequest, APIResponse
 from utils.OTP import generate_otp, send_otp_email, pwd_context
 
 OTPRouter = APIRouter()
@@ -39,7 +39,10 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
         print(f"Error sending email: {str(e)}")
         raise HTTPException(status_code=500, detail="Error sending email")
 
-    return {"message": "OTP sent to your email"}
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="OTP sent to your email"
+    ) 
 
 
 # Endpoint to verify OTP and reset password
@@ -67,4 +70,7 @@ async def verify_otp(request: OTPVerificationRequest = Body(...), db: Session = 
     db.delete(otp_record)
     db.commit()
 
-    return {"message": "Password reset successful"}
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Password reset successful"
+    ) 

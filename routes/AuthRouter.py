@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database.Engine import get_db
-from database.dtos import UserCreateRequest, UserCreateResponse
+from database.dtos import UserCreateRequest, UserCreateResponse, LoginRequest, APIResponse
 from models import User, Token
 from utils.Security import create_access_token, create_refresh_token, authenticate_user, verify_refresh_token, \
     pwd_context, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -18,7 +18,7 @@ AuthRouter = APIRouter()
 async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     hashed_password = pwd_context.hash(user_data.password)
     db_user = User(
         user_id=str(uuid.uuid4()),
@@ -30,16 +30,16 @@ async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_
     db.commit()
     db.refresh(db_user)
 
-    return {
-        "code": status.HTTP_201_CREATED,
-        "message": "Registration success",
-        "data": UserCreateResponse(fullname=db_user.fullname, email=db_user.email)
-    }
+    return  APIResponse(
+        code=status.HTTP_201_CREATED,
+        message="Registration success",
+        data=UserCreateResponse(fullname=db_user.fullname, email=db_user.email)
+    ) 
 
 
 @AuthRouter.post("/login")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(form_data.username, form_data.password, db)
+async def login_for_access_token(login_data: LoginRequest, db: Session = Depends(get_db)):
+    user = authenticate_user(login_data.email, login_data.password, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,15 +53,16 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": str(user.user_id)}, expires_delta=access_token_expires
     )
     refresh_token = create_refresh_token(user.user_id, db)
-    return {
-        "code": status.HTTP_200_OK,
-        "message": "Login success",
-        "data": {
+    
+    return  APIResponse(
+        code=status.HTTP_200_OK,
+        message="Login success",
+        data={
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer"
         }
-    }
+    ) 
 
 
 @AuthRouter.post("/refresh-token")
@@ -86,13 +87,14 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     # delete the old refresh token from the database
     db.query(Token).filter(Token.token == refresh_token).delete()
     db.commit()
-
-    return {
-        "code": status.HTTP_200_OK,
-        "message": "Token refresh success",
-        "data": {
+    
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Token refresh success",
+        data={
             "access_token": access_token,
             "refresh_token": new_refresh_token,
             "token_type": "bearer"
         }
-    }
+    ) 
+    
