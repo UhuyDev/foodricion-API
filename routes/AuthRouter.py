@@ -1,5 +1,5 @@
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -49,6 +49,7 @@ async def login_for_access_token(login_data: LoginRequest, db: Session = Depends
     db.query(Token).filter(Token.user_id == user.user_id).delete()
     db.commit()
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expired_at = datetime.now(timezone.utc) + access_token_expires
     access_token = create_access_token(
         data={"sub": str(user.user_id)}, expires_delta=access_token_expires
     )
@@ -60,7 +61,7 @@ async def login_for_access_token(login_data: LoginRequest, db: Session = Depends
         data={
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "token_type": "bearer"
+            "expired_at": int(access_token_expired_at.timestamp())
         }
     ) 
 
@@ -77,6 +78,7 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 
     # Create a new access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expired_at = datetime.now(timezone.utc) + access_token_expires
     access_token = create_access_token(
         data={"sub": str(db_token.user_id)}, expires_delta=access_token_expires
     )
@@ -94,7 +96,7 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
         data={
             "access_token": access_token,
             "refresh_token": new_refresh_token,
-            "token_type": "bearer"
+            "expired_at": int(access_token_expired_at.timestamp())
         }
     ) 
     
