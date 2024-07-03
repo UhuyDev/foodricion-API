@@ -32,7 +32,7 @@ def datetime_to_timestamp(dt):
 
 def delete_expired_otps():
     with Sessionlocal() as db:
-        db.query(models.OTP).filter(models.OTP.expiry_at <= datetime_to_timestamp(datetime.now(timezone.utc))).delete()
+        db.query(models.OTP).filter(models.OTP.expires_at <= datetime_to_timestamp(datetime.now(timezone.utc))).delete()
         db.commit()
 
 

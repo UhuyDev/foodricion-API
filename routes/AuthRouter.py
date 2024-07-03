@@ -73,15 +73,26 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
             detail="Invalid or expired refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Create a new access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(db_token.user_id)}, expires_delta=access_token_expires
     )
+
+    # Create a new refresh token
+    new_refresh_token = create_refresh_token(db_token.user_id, db)
+
+    # delete the old refresh token from the database
+    db.query(Token).filter(Token.token == refresh_token).delete()
+    db.commit()
+
     return {
         "code": status.HTTP_200_OK,
         "message": "Token refresh success",
         "data": {
             "access_token": access_token,
+            "refresh_token": new_refresh_token,
             "token_type": "bearer"
         }
     }

@@ -27,8 +27,8 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
     # Generate OTP
     otp = generate_otp()
     # Store OTP in database
-    expiry_time = datetime.now(timezone.utc) + timedelta(minutes=3)
-    db_otp = models.OTP(user_id=user.user_id, otp_code=otp, expiry_at=datetime_to_timestamp(expiry_time))
+    expire_time = datetime.now(timezone.utc) + timedelta(minutes=3)
+    db_otp = models.OTP(user_id=user.user_id, otp_code=otp, expires_at=datetime_to_timestamp(expire_time))
     db.add(db_otp)
     db.commit()
 
@@ -53,7 +53,7 @@ async def verify_otp(request: OTPVerificationRequest = Body(...), db: Session = 
     otp_record = db.query(models.OTP).filter(
         models.OTP.user_id == user.user_id,
         models.OTP.otp_code == request.otp,
-        models.OTP.expiry_at > datetime_to_timestamp(datetime.now(timezone.utc))
+        models.OTP.expires_at > datetime_to_timestamp(datetime.now(timezone.utc))
     ).first()
 
     if not otp_record:
