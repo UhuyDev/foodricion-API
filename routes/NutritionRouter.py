@@ -7,7 +7,7 @@ from database.dtos import APIResponse
 NutritionRouter = APIRouter()
 
 
-@NutritionRouter.get("/food", status_code=status.HTTP_200_OK)
+@NutritionRouter.get("/foods", status_code=status.HTTP_200_OK)
 async def read_food_all(db: Session = Depends(get_db)):
     """Get all food data."""
     food_all = db.query(Food).all()
