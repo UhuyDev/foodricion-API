@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+
 from database.Engine import get_db
-from database.dtos import BookmarkCreateRequest
-from models import BookmarkNutrition, User, Food, NutritionDetails
+from database.dtos import APIResponse
+from models import FoodBookmark, User, Food, NutritionDetails
 from utils.Security import get_current_user
 
 BookmarkRouter = APIRouter()
@@ -14,7 +15,7 @@ async def get_bookmarks(
         db: Session = Depends(get_db),
         include_nutrition: bool = Query(False, description="Include nutrition details (True/False)")
 ):
-    bookmarks = db.query(BookmarkNutrition).filter(BookmarkNutrition.user_id == current_user.user_id).all()
+    bookmarks = db.query(FoodBookmark).filter(FoodBookmark.user_id == current_user.user_id).all()
 
     if not bookmarks:
         raise HTTPException(status_code=404, detail='Bookmarks not found for this user')
@@ -49,19 +50,22 @@ async def create_bookmark(
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    bookmark_data = BookmarkCreateRequest(food_id=None, food_name=None)
+    # Initialize variables
+    food_id = None
+    food_name = None
+
     try:
         # Check if identifier is food_id (integer)
-        bookmark_data.food_id = int(food_identifier)
+        food_id = int(food_identifier)
     except ValueError:
         # If not integer, assume its food_name
-        bookmark_data.food_name = food_identifier
+        food_name = food_identifier
 
     # Allow creating bookmarks by food_name or food_id (priority to food_id)
-    if bookmark_data.food_id:
-        food_item = db.query(Food).filter(Food.food_id == bookmark_data.food_id).first()
-    elif bookmark_data.food_name:
-        food_item = db.query(Food).filter(Food.food_name == bookmark_data.food_name).first()
+    if food_id:
+        food_item = db.query(Food).filter(Food.food_id == food_id).first()
+    elif food_name:
+        food_item = db.query(Food).filter(Food.food_name == food_name).first()
     else:
         raise HTTPException(status_code=400, detail="Either food_id or food_name is required")
 
@@ -69,20 +73,26 @@ async def create_bookmark(
         raise HTTPException(status_code=404, detail="Food item not found")
 
     # Check if the bookmark already exists for this user and food
-    existing_bookmark = db.query(BookmarkNutrition).filter(
-        BookmarkNutrition.user_id == current_user.user_id,
-        BookmarkNutrition.food_id == food_item.food_id
+    db.query(FoodBookmark).filter(
+        FoodBookmark.user_id == current_user.user_id,
+        FoodBookmark.food_id == food_item.food_id
     ).first()
 
-    if existing_bookmark:
-        raise HTTPException(status_code=400, detail="Food item already bookmarked")
-
     # Create the new bookmark
-    db_bookmark = BookmarkNutrition(
+    db_bookmark = FoodBookmark(
         user_id=current_user.user_id,
         food_id=food_item.food_id
     )
     db.add(db_bookmark)
     db.commit()
     db.refresh(db_bookmark)
-    return db_bookmark
+
+    return APIResponse(
+        code=status.HTTP_201_CREATED,
+        message="Bookmark created successfully",
+        data={
+            "bookmark_id": db_bookmark.bookmark_id,
+            "food_id": db_bookmark.food_id,
+            "bookmark_date": db_bookmark.bookmark_date,
+        }
+    )
