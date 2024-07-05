@@ -24,9 +24,8 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Generate OTP
+    # Generate and store OTP in databases
     otp = generate_otp()
-    # Store OTP in database
     expire_time = datetime.now(timezone.utc) + timedelta(minutes=3)
     db_otp = models.OTP(user_id=user.user_id, otp_code=otp, expires_at=datetime_to_timestamp(expire_time))
     db.add(db_otp)
@@ -35,17 +34,16 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
     # Send OTP email
     try:
         await send_otp_email(request.email, otp)
-    except Exception as e:
-        print(f"Error sending email: {str(e)}")
+    except Exception:
+        db.rollback()  # Rollback the OTP insertion if email sending fails
         raise HTTPException(status_code=500, detail="Error sending email")
 
     return APIResponse(
         code=status.HTTP_200_OK,
         message="OTP sent to your email"
-    ) 
+    )
 
 
-# Endpoint to verify OTP and reset password
 @OTPRouter.post("/verify-otp", status_code=status.HTTP_200_OK)
 async def verify_otp(request: OTPVerificationRequest = Body(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()
@@ -53,24 +51,23 @@ async def verify_otp(request: OTPVerificationRequest = Body(...), db: Session = 
         raise HTTPException(status_code=404, detail="User not found")
 
     # Check if OTP exists and is valid
+    current_time = datetime_to_timestamp(datetime.now(timezone.utc))
     otp_record = db.query(models.OTP).filter(
         models.OTP.user_id == user.user_id,
         models.OTP.otp_code == request.otp,
-        models.OTP.expires_at > datetime_to_timestamp(datetime.now(timezone.utc))
+        models.OTP.expires_at > current_time
     ).first()
 
     if not otp_record:
         raise HTTPException(status_code=400, detail="Invalid or expired OTP")
 
-    # Update user's password
+    # Update user's password and delete the used OTP
     hashed_password = pwd_context.hash(request.new_password)
     user.password_hash = hashed_password
-
-    # Delete the used OTP
     db.delete(otp_record)
     db.commit()
 
     return APIResponse(
         code=status.HTTP_200_OK,
         message="Password reset successful"
-    ) 
+    )

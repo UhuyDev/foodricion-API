@@ -19,17 +19,17 @@ async def update_profile(profile_update_request: ProfileUpdateRequest,
     if current_user.email != profile_update_request.email:
         existing_user = db.query(User).filter(User.email == profile_update_request.email).first()
         if existing_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     current_user.fullname = profile_update_request.full_name
     current_user.email = profile_update_request.email
     db.commit()
     db.refresh(current_user)
-    
+
     return APIResponse(
         code=status.HTTP_200_OK,
         message="Profile updated successfully",
-        data = {
+        data={
             "email": current_user.email,
             "fullname": current_user.fullname
         }
@@ -46,8 +46,8 @@ async def change_password(password_change_request: PasswordChangeRequest,
     current_user.password_hash = new_hashed_password
     db.commit()
     db.refresh(current_user)
-    
+
     return APIResponse(
         code=status.HTTP_200_OK,
         message="Password changed successfully"
-    ) 
+    )
