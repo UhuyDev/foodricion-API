@@ -16,11 +16,11 @@ models.Base.metadata.create_all(bind=engine)
 
 # Include routers
 app.include_router(routes.AuthRouter)
+app.include_router(routes.OTPRouter)
+app.include_router(routes.UserRouter)
+app.include_router(routes.NutritionRouter)
 app.include_router(routes.BookmarkRouter)
 app.include_router(routes.ChatbotRouter)
-app.include_router(routes.NutritionRouter)
-app.include_router(routes.UserRouter)
-app.include_router(routes.OTPRouter)
 
 # Include Middleware
 app.add_middleware(ResponseMiddleware)

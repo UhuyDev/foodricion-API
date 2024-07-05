@@ -1,4 +1,6 @@
 from .ChatbotHistoryCreateRequest import ChatbotHistoryCreateRequest
+from .BookmarkCreateRequest import BookmarkCreateRequest
+from .BookmarkDeleteRequest import BookmarkDeleteRequest
 from .PasswordChangeRequest import PasswordChangeRequest
 from .ProfileUpdateRequest import ProfileUpdateRequest
 from .UserCreateRequest import UserCreateRequest
