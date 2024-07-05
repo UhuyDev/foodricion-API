@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, APIRouter
 from sqlalchemy.orm import Session
 from database.Engine import get_db
 from models import Food, NutritionDetails
@@ -23,54 +23,45 @@ async def read_food_all(db: Session = Depends(get_db)):
     )
 
 
-@NutritionRouter.get("/nutrition/{food_identifier}", status_code=status.HTTP_200_OK)
-async def read_nutrition(food_identifier: str, db: Session = Depends(get_db)):
-    """
-    Get food and nutrition details by either food name or food_id.
-    """
-    try:
-        # Check if identifier is food_id (integer)
-        food_id = int(food_identifier)
-        food = db.query(Food).filter(Food.food_id == food_id).first()
-    except ValueError:
-        # If not integer, assume its food_name
-        food = db.query(Food).filter(Food.food_name == food_identifier).first()
-
+@NutritionRouter.get("/foods/nutrition", status_code=status.HTTP_200_OK)
+async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
+    """Get nutrition details by food name."""
+    food = db.query(Food).filter(Food.food_name == food_name).first()
     if not food:
-        raise HTTPException(status_code=404, detail="Food not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Food not found")
 
-    nutrition_details = (
-        db.query(NutritionDetails).filter(NutritionDetails.food_id == food.food_id).first()
-    )
+    nutrition_details = db.query(NutritionDetails).filter(NutritionDetails.food_id == food.food_id).first()
+    if not nutrition_details:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nutrition details not found")
 
     return APIResponse(
         code=status.HTTP_200_OK,
-        message="Food data retrieved successfully",
+        message="Nutrition details retrieved successfully",
         data={
             "food_id": food.food_id,
             "food_name": food.food_name,
-            "food_image": food.food_image,
-            "food_type": food.food_type,
-            "energy": nutrition_details.energy if nutrition_details else None,
-            "total_fat": nutrition_details.total_fat if nutrition_details else None,
-            "vitamin_A": nutrition_details.vitamin_A if nutrition_details else None,
-            "vitamin_B1": nutrition_details.vitamin_B1 if nutrition_details else None,
-            "vitamin_B2": nutrition_details.vitamin_B2 if nutrition_details else None,
-            "vitamin_B3": nutrition_details.vitamin_B3 if nutrition_details else None,
-            "vitamin_C": nutrition_details.vitamin_C if nutrition_details else None,
-            "total_carbohydrate": nutrition_details.total_carbohydrate if nutrition_details else None,
-            "protein": nutrition_details.protein if nutrition_details else None,
-            "dietary_fiber": nutrition_details.dietary_fiber if nutrition_details else None,
-            "calcium": nutrition_details.calcium if nutrition_details else None,
-            "phosphorus": nutrition_details.phosphorus if nutrition_details else None,
-            "sodium": nutrition_details.sodium if nutrition_details else None,
-            "potassium": nutrition_details.potassium if nutrition_details else None,
-            "copper": nutrition_details.copper if nutrition_details else None,
-            "iron": nutrition_details.iron if nutrition_details else None,
-            "zinc": nutrition_details.zinc if nutrition_details else None,
-            "b_carotene": nutrition_details.b_carotene if nutrition_details else None,
-            "total_carotene": nutrition_details.total_carotene if nutrition_details else None,
-            "water": nutrition_details.water if nutrition_details else None,
-            "ash": nutrition_details.ash if nutrition_details else None,
+            "nutrition_details": {
+                "energy": nutrition_details.energy,
+                "total_fat": nutrition_details.total_fat,
+                "vitamin_A": nutrition_details.vitamin_A,
+                "vitamin_B1": nutrition_details.vitamin_B1,
+                "vitamin_B2": nutrition_details.vitamin_B2,
+                "vitamin_B3": nutrition_details.vitamin_B3,
+                "vitamin_C": nutrition_details.vitamin_C,
+                "total_carbohydrate": nutrition_details.total_carbohydrate,
+                "protein": nutrition_details.protein,
+                "dietary_fiber": nutrition_details.dietary_fiber,
+                "calcium": nutrition_details.calcium,
+                "phosphorus": nutrition_details.phosphorus,
+                "sodium": nutrition_details.sodium,
+                "potassium": nutrition_details.potassium,
+                "copper": nutrition_details.copper,
+                "iron": nutrition_details.iron,
+                "zinc": nutrition_details.zinc,
+                "b_carotene": nutrition_details.b_carotene,
+                "total_carotene": nutrition_details.total_carotene,
+                "water": nutrition_details.water,
+                "ash": nutrition_details.ash
+            }
         }
     )
