@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.Engine import get_db
-from database.dtos import BookmarkCreateRequest, APIResponse
+from database.dtos import BookmarkCreateRequest, APIResponse, BookmarkDeleteRequest
 from models import FoodBookmark, User, Food, NutritionDetails
 from utils.Security import get_current_user
 
@@ -83,4 +83,27 @@ async def create_bookmark(
             "food_id": db_bookmark.food_id,
             "bookmark_date": db_bookmark.bookmark_date,
         }
+    )
+
+
+@BookmarkRouter.delete("/bookmarks/", status_code=status.HTTP_200_OK)
+async def delete_bookmark(
+        bookmark_delete_request: BookmarkDeleteRequest,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    bookmark = db.query(FoodBookmark).filter(
+        FoodBookmark.bookmark_id == bookmark_delete_request.bookmark_id,
+        FoodBookmark.user_id == current_user.user_id
+    ).first()
+
+    if not bookmark:
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+
+    db.delete(bookmark)
+    db.commit()
+
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Bookmark deleted successfully",
     )
