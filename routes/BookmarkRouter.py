@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.Engine import get_db
-from database.dtos import BookmarkCreateRequest
+from database.dtos import BookmarkCreateRequest, APIResponse
 from models import FoodBookmark, User, Food, NutritionDetails
 from utils.Security import get_current_user
 
@@ -24,12 +24,36 @@ async def get_bookmarks(
         food = db.query(Food).filter(Food.food_id == bookmark.food_id).first()
         nutrition = db.query(NutritionDetails).filter(NutritionDetails.food_id == bookmark.food_id).first()
         bookmark_data.append({
-            "bookmark": bookmark,
-            "food": food,
-            "nutrition": nutrition
+            "bookmark": bookmark.bookmark_id,
+            "food": food.food_name,
+            "energy": nutrition.energy,
+            "total_fat": nutrition.total_fat,
+            "vitamin_A": nutrition.vitamin_A,
+            "vitamin_B1": nutrition.vitamin_B1,
+            "vitamin_B2": nutrition.vitamin_B2,
+            "vitamin_B3": nutrition.vitamin_B3,
+            "vitamin_C": nutrition.vitamin_C,
+            "total_carbohydrate": nutrition.total_carbohydrate,
+            "protein": nutrition.protein,
+            "dietary_fiber": nutrition.dietary_fiber,
+            "calcium": nutrition.calcium,
+            "phosphorus": nutrition.phosphorus,
+            "sodium": nutrition.sodium,
+            "potassium": nutrition.potassium,
+            "copper": nutrition.copper,
+            "iron": nutrition.iron,
+            "zinc": nutrition.zinc,
+            "b_carotene": nutrition.b_carotene,
+            "total_carotene": nutrition.total_carotene,
+            "water": nutrition.water,
+            "ash": nutrition.ash
         })
 
-    return bookmark_data
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Bookmarks retrieved successfully",
+        data=bookmark_data
+    )
 
 
 @BookmarkRouter.post("/bookmarks/", status_code=status.HTTP_201_CREATED)
@@ -51,8 +75,12 @@ async def create_bookmark(
     db.commit()
     db.refresh(db_bookmark)
 
-    return {
-        "bookmark_id": db_bookmark.bookmark_id,
-        "food_id": db_bookmark.food_id,
-        "bookmark_date": db_bookmark.bookmark_date,
-    }
+    return APIResponse(
+        code=status.HTTP_201_CREATED,
+        message="Bookmark created successfully",
+        data={
+            "bookmark_id": db_bookmark.bookmark_id,
+            "food_id": db_bookmark.food_id,
+            "bookmark_date": db_bookmark.bookmark_date,
+        }
+    )
