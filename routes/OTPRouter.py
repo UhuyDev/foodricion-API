@@ -24,6 +24,9 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Delete previous OTPs for the user
+    db.query(models.OTP).filter(models.OTP.user_id == user.user_id).delete()
+
     # Generate and store OTP in databases
     otp = generate_otp()
     expire_time = datetime.now(timezone.utc) + timedelta(minutes=3)
