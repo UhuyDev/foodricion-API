@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status, APIRouter
 from sqlalchemy.orm import Session
 from database.Engine import get_db
-from models import Food, NutritionDetails
+from models import Food, Nutrition
 from database.dtos import APIResponse
 
 NutritionRouter = APIRouter()
@@ -30,7 +30,7 @@ async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
     if not food:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Food not found")
 
-    nutrition_details = db.query(NutritionDetails).filter(NutritionDetails.food_id == food.food_id).first()
+    nutrition_details = db.query(Nutrition).filter(Nutrition.food_id == food.food_id).first()
     if not nutrition_details:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nutrition details not found")
 

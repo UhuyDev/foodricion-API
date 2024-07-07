@@ -3,12 +3,15 @@ from sqlalchemy import Column, Integer, Float, ForeignKey
 from .Base import Base
 
 
-class NutritionDetails(Base):
-    __tablename__ = 'nutrition_details'
+class Nutrition(Base):
+    __tablename__ = 'nutrition'
     id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
     food_id = Column(Integer, ForeignKey('food.food_id'), nullable=False)
     energy = Column(Float)
     total_fat = Column(Float)
+    saturated_fat = Column(Float)
+    polyunsaturated_fat = Column(Float)
+    sugar = Column(Float)
     vitamin_A = Column(Float)
     vitamin_B1 = Column(Float)
     vitamin_B2 = Column(Float)

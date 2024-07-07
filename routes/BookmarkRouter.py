@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.Engine import get_db
 from database.dtos import BookmarkCreateRequest, APIResponse, BookmarkDeleteRequest
-from models import FoodBookmark, User, Food, NutritionDetails
+from models import FoodBookmark, User, Food, Nutrition
 from utils.Security import get_current_user
 
 BookmarkRouter = APIRouter()
@@ -22,7 +22,7 @@ async def get_bookmarks(
     bookmark_data = []
     for bookmark in bookmarks:
         food = db.query(Food).filter(Food.food_id == bookmark.food_id).first()
-        nutrition = db.query(NutritionDetails).filter(NutritionDetails.food_id == bookmark.food_id).first()
+        nutrition = db.query(Nutrition).filter(Nutrition.food_id == bookmark.food_id).first()
         bookmark_data.append({
             "bookmark": bookmark.bookmark_id,
             "food": food.food_name,
