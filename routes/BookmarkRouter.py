@@ -13,44 +13,47 @@ async def get_bookmarks(
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    bookmarks = db.query(FoodBookmark).filter(FoodBookmark.user_id == current_user.user_id).all()
+    bookmarks = (
+        db.query(FoodBookmark, Food, Nutrition)
+        .join(Food, Food.food_id == FoodBookmark.food_id)
+        .join(Nutrition, Nutrition.food_id == Food.food_id)
+        .filter(FoodBookmark.user_id == current_user.user_id)
+        .all()
+    )
 
     if not bookmarks:
         raise HTTPException(status_code=404, detail='Bookmarks not found for this user')
 
     bookmark_data = []
     for bookmark in bookmarks:
-        food = db.query(Food).filter(Food.food_id == bookmark.food_id).first()
-        nutrition = db.query(Nutrition).filter(Nutrition.food_id == bookmark.food_id).first()
-
-        if food and nutrition:
+        if bookmark.Food and bookmark.Nutrition:
             bookmark_data.append({
-                "bookmark": bookmark.bookmark_id,
-                "food": food.food_name,
-                "energy": nutrition.energy,
-                "total_fat": nutrition.total_fat,
-                "saturated_fat": nutrition.saturated_fat,
-                "polyunsaturated_fat": nutrition.polyunsaturated_fat,
-                "sugar": nutrition.sugar,
-                "vitamin_A": nutrition.vitamin_A,
-                "vitamin_B1": nutrition.vitamin_B1,
-                "vitamin_B2": nutrition.vitamin_B2,
-                "vitamin_B3": nutrition.vitamin_B3,
-                "vitamin_C": nutrition.vitamin_C,
-                "total_carbohydrate": nutrition.total_carbohydrate,
-                "protein": nutrition.protein,
-                "dietary_fiber": nutrition.dietary_fiber,
-                "calcium": nutrition.calcium,
-                "phosphorus": nutrition.phosphorus,
-                "sodium": nutrition.sodium,
-                "potassium": nutrition.potassium,
-                "copper": nutrition.copper,
-                "iron": nutrition.iron,
-                "zinc": nutrition.zinc,
-                "b_carotene": nutrition.b_carotene,
-                "total_carotene": nutrition.total_carotene,
-                "water": nutrition.water,
-                "ash": nutrition.ash
+                "bookmark": bookmark.FoodBookmark.bookmark_id,
+                "food": bookmark.Food.food_name,
+                "energy": bookmark.Nutrition.energy,
+                "total_fat": bookmark.Nutrition.total_fat,
+                "saturated_fat": bookmark.Nutrition.saturated_fat,
+                "polyunsaturated_fat": bookmark.Nutrition.polyunsaturated_fat,
+                "sugar": bookmark.Nutrition.sugar,
+                "vitamin_A": bookmark.Nutrition.vitamin_A,
+                "vitamin_B1": bookmark.Nutrition.vitamin_B1,
+                "vitamin_B2": bookmark.Nutrition.vitamin_B2,
+                "vitamin_B3": bookmark.Nutrition.vitamin_B3,
+                "vitamin_C": bookmark.Nutrition.vitamin_C,
+                "total_carbohydrate": bookmark.Nutrition.total_carbohydrate,
+                "protein": bookmark.Nutrition.protein,
+                "dietary_fiber": bookmark.Nutrition.dietary_fiber,
+                "calcium": bookmark.Nutrition.calcium,
+                "phosphorus": bookmark.Nutrition.phosphorus,
+                "sodium": bookmark.Nutrition.sodium,
+                "potassium": bookmark.Nutrition.potassium,
+                "copper": bookmark.Nutrition.copper,
+                "iron": bookmark.Nutrition.iron,
+                "zinc": bookmark.Nutrition.zinc,
+                "b_carotene": bookmark.Nutrition.b_carotene,
+                "total_carotene": bookmark.Nutrition.total_carotene,
+                "water": bookmark.Nutrition.water,
+                "ash": bookmark.Nutrition.ash
             })
 
     return APIResponse(
