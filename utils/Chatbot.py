@@ -18,7 +18,6 @@ except Exception as e:
     raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-# Preprocess the input text
 def preprocess_input(text):
     tokens = text.split()
     bag = np.zeros(len(words), dtype=int)
@@ -28,7 +27,6 @@ def preprocess_input(text):
     return np.array([bag])
 
 
-# Get the chatbot response
 async def chatbot_response(user_input):
     processed_input = preprocess_input(user_input)
     prediction = model.predict(processed_input)

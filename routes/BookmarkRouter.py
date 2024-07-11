@@ -1,4 +1,3 @@
-# BookmarkRouter.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.Engine import get_db
@@ -23,31 +22,36 @@ async def get_bookmarks(
     for bookmark in bookmarks:
         food = db.query(Food).filter(Food.food_id == bookmark.food_id).first()
         nutrition = db.query(Nutrition).filter(Nutrition.food_id == bookmark.food_id).first()
-        bookmark_data.append({
-            "bookmark": bookmark.bookmark_id,
-            "food": food.food_name,
-            "energy": nutrition.energy,
-            "total_fat": nutrition.total_fat,
-            "vitamin_A": nutrition.vitamin_A,
-            "vitamin_B1": nutrition.vitamin_B1,
-            "vitamin_B2": nutrition.vitamin_B2,
-            "vitamin_B3": nutrition.vitamin_B3,
-            "vitamin_C": nutrition.vitamin_C,
-            "total_carbohydrate": nutrition.total_carbohydrate,
-            "protein": nutrition.protein,
-            "dietary_fiber": nutrition.dietary_fiber,
-            "calcium": nutrition.calcium,
-            "phosphorus": nutrition.phosphorus,
-            "sodium": nutrition.sodium,
-            "potassium": nutrition.potassium,
-            "copper": nutrition.copper,
-            "iron": nutrition.iron,
-            "zinc": nutrition.zinc,
-            "b_carotene": nutrition.b_carotene,
-            "total_carotene": nutrition.total_carotene,
-            "water": nutrition.water,
-            "ash": nutrition.ash
-        })
+
+        if food and nutrition:
+            bookmark_data.append({
+                "bookmark": bookmark.bookmark_id,
+                "food": food.food_name,
+                "energy": nutrition.energy,
+                "total_fat": nutrition.total_fat,
+                "saturated_fat": nutrition.saturated_fat,
+                "polyunsaturated_fat": nutrition.polyunsaturated_fat,
+                "sugar": nutrition.sugar,
+                "vitamin_A": nutrition.vitamin_A,
+                "vitamin_B1": nutrition.vitamin_B1,
+                "vitamin_B2": nutrition.vitamin_B2,
+                "vitamin_B3": nutrition.vitamin_B3,
+                "vitamin_C": nutrition.vitamin_C,
+                "total_carbohydrate": nutrition.total_carbohydrate,
+                "protein": nutrition.protein,
+                "dietary_fiber": nutrition.dietary_fiber,
+                "calcium": nutrition.calcium,
+                "phosphorus": nutrition.phosphorus,
+                "sodium": nutrition.sodium,
+                "potassium": nutrition.potassium,
+                "copper": nutrition.copper,
+                "iron": nutrition.iron,
+                "zinc": nutrition.zinc,
+                "b_carotene": nutrition.b_carotene,
+                "total_carotene": nutrition.total_carotene,
+                "water": nutrition.water,
+                "ash": nutrition.ash
+            })
 
     return APIResponse(
         code=status.HTTP_200_OK,

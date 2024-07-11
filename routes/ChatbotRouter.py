@@ -23,9 +23,11 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
     db.commit()
     db.refresh(chat_entry)
 
-    return APIResponse(code=200,
-                       message="Success",
-                       data={"response": response})
+    return APIResponse(
+        code=200,
+        message="Success",
+        data={"response": response}
+    )
 
 
 @ChatbotRouter.get("/chatbot-history", status_code=status.HTTP_200_OK)
@@ -37,15 +39,18 @@ async def read_chatbot_history(current_user: User = Depends(get_current_user), d
         raise HTTPException(status_code=404, detail='Chatbot history not found for this user')
 
     # Convert the chatbot history to a list of dictionaries
-    chatbot_history_data = []
-    for chatbot in chatbot_history:
-        chatbot_history_data.append({
+    chatbot_history_data = [
+        {
             "user_id": chatbot.user_id,
             "message": chatbot.message,
             "response": chatbot.response,
             "timestamp": chatbot.timestamp.isoformat() if chatbot.timestamp else None
-        })
+        }
+        for chatbot in chatbot_history
+    ]
 
-    return APIResponse(code=200,
-                       message="chatbot history retrieved successfully",
-                       data=chatbot_history_data)
+    return APIResponse(
+        code=200,
+        message="Chatbot history retrieved successfully",
+        data=chatbot_history_data
+    )
