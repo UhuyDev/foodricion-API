@@ -1,4 +1,3 @@
-from .ChatbotHistoryCreateRequest import ChatbotHistoryCreateRequest
 from .BookmarkCreateRequest import BookmarkCreateRequest
 from .BookmarkDeleteRequest import BookmarkDeleteRequest
 from .PasswordChangeRequest import PasswordChangeRequest
@@ -9,3 +8,4 @@ from .ForgotPasswordRequest import ForgotPasswordRequest
 from .OTPVerificationRequest import OTPVerificationRequest
 from .LoginRequest import LoginRequest
 from .APIResponse import APIResponse
+from .ChatbotCreateRequest import ChatRequest

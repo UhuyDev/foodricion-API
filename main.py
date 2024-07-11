@@ -25,6 +25,7 @@ app.add_middleware(ResponseMiddleware)
 
 
 # Root endpoint to check if the API is working
+@app.head("/", status_code=200)
 @app.get("/", status_code=200)
 def welcome():
     return "foodricion-api is working"

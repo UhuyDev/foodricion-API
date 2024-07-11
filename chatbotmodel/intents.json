@@ -1,0 +1,434 @@
+{
+    "intents":[
+        {
+            "tag": "notfound",
+            "patterns": [
+                "",
+                "",
+                "",
+                "",
+                ""
+            ],
+            "responses": [
+                "Maaf, saya tidak mengerti pertanyaan Anda. Mungkin Anda bisa menanyakan mengenai seputar nutrisi makanan atau aplikasi ini.",
+                "Kata-kata tersebut diluar kemampuan kami. Silakan tanyakan sesuatu yang berhubungan dengan nutrisi atau aplikasi ini."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "sapaan",
+            "patterns": [
+                "Halo",
+                "Hai",
+                "Haii",
+                "Haiii",
+                "Haiiii",
+                "Selamat pagi",
+                "Selamat siang",
+                "Selamat sore",
+                "Selamat malam",
+                "Apa kabar?",
+                "Bagaimana hari Anda?",
+                "Tolong bantu saya",
+                "mau tanya",
+                "Hay",
+                "Hy",
+                "Hallo",
+                "Hey",
+                "Hola",
+                "Hello",
+                "Hai",
+                "p",
+                "hai",
+                "halo",
+                "hay",
+                "haii",
+                "mikum",
+                "assamualaikaum",
+                "hi"
+            ],
+            "responses": [
+                "Halo, ada yang bisa saya bantu?",
+                "Hai, ada yang ingin Anda tanyakan?",
+                "Bagaimana saya bisa membantumu hari ini?",
+                "Apa yang bisa saya lakukan untuk Anda?",
+                "Ada yang spesifik mengenai makanan yang ingin Anda ketahui?",
+                "Apakah Anda membutuhkan bantuan hari ini?",
+                "halo, silahkan bertanya",
+                "Silahkan Jangan ragu untuk bertanya jika ada yang perlu Anda tanyakan.",
+                "Tentu, saya di sini untuk membantu Anda.",
+                "Apa yang mau Anda ketahui?",
+                "silahkan tanyakan saja",
+                "ada yang bisa saya bantu?"
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "penyudahan",
+            "patterns": [
+                "dah",
+                "sampai jumpa",
+                "bye bye",
+                "Sampai nanti",
+                "Selamat tinggal",
+                "Saya pergi",
+                "Bye",
+                "Semoga harimu menyenangkan",
+                "bicara nanti",
+                "saya harus pergi"
+            ],
+            "responses": [
+                "Sedih melihatmu pergi :(",
+                "Sampai berjumpa kembali dilain waktu",
+                "Selamat tinggal!",
+                "Jangan lupakan kami"
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "terima kasih",
+            "patterns": [
+                "terima kasih",
+                "makasih ya",
+                "makasih",
+                "makasih jawabanya",
+                "mantap",
+                "tepat",
+                "siap",
+                "matur nuwun",
+                "terima kasih banyak",
+                "Terima kasih",
+                "Thanks",
+                "Thank you",
+                "Itu membantu",
+                "Luar biasa, terima kasih",
+                "Terima kasih telah membantu saya",
+                "Ok, terima kasih",
+                "makasih",
+                "terimakasih",
+                "thq"
+            ],
+            "responses": [
+                "Sama-sama! Senang bisa membantu.",
+                "Tidak masalah! Jika ada lagi yang ingin ditanyakan, jangan ragu untuk bertanya.",
+                "Selamat! Jika ada pertanyaan lain, saya siap membantu."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "tugas",
+            "patterns": [
+                "Apa yang bisa kamu lakukan",
+                "bisa apa aja",
+                "kamu bisa menjawab pertanyaan ada apa saja",
+                "scope pertanyaanmu ada apa saja",
+                "bagaimana kamu bisa membantu saya",
+                "Untuk apa saya menggunakan mu"
+            ],
+            "responses": [
+                "Saya dapat membantu menjawab pertanyaan seputar nutrisi makanan, diet, manfaat nutrisi, sumber makanan, dll."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "vitamin a",
+            "patterns": [
+                "Apa itu Vitamin A?",
+                "Vitamin a",
+                "vitamin a",
+                "apa fungsi Vitamin A?",
+                "mengapa kita butuh Vitamin A?",
+                "apa saja manfaat Vitamin A?"
+            ],
+            "responses": [
+                "Vitamin A adalah nutrisi penting yang mendukung kesehatan mata, sistem kekebalan tubuh, dan perkembangan sel-sel tubuh."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung vitamin a",
+            "patterns": [
+                "Apa saja makanan yang mengandung vitamin A?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung vitamin A?",
+                "Apa saja jenis makanan yang kaya akan vitamin A?",
+                "Bagaimana cara meningkatkan asupan vitamin A melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak vitamin A?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan vitamin A yang cukup?"
+            ],
+            "responses": [
+                "Beberapa makanan yang kaya akan vitamin A antara lain wortel, bayam, ubi jalar, hati sapi, dan kuning telur.",
+                "Tentu saja! Wortel, bayam, ubi jalar, hati sapi, dan kuning telur merupakan contoh makanan yang mengandung banyak vitamin A.",
+                "Makanan yang kaya akan vitamin A meliputi sayuran berdaun hijau seperti bayam, serta makanan berwarna orange seperti wortel dan ubi jalar.",
+                "Anda dapat meningkatkan asupan vitamin A dengan mengonsumsi lebih banyak sayuran berdaun hijau dan makanan berwarna orange seperti wortel dan ubi jalar.",
+                "Ya, makanan sehat yang mengandung banyak vitamin A antara lain wortel, bayam, ubi jalar, hati sapi, dan kuning telur.",
+                "Untuk memenuhi kebutuhan vitamin A, Anda bisa mengonsumsi wortel, bayam, ubi jalar, hati sapi, dan kuning telur secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "vitamin b",
+            "patterns": [
+                "Apa itu Vitamin B?",
+                "Vitamin b",
+                "vitamin b",
+                "apa fungsi Vitamin B?",
+                "mengapa kita butuh Vitamin B?",
+                "apa saja manfaat Vitamin B?"
+            ],
+            "responses": [
+                "Vitamin B adalah kelompok vitamin yang penting untuk metabolisme energi, fungsi saraf, dan produksi sel darah merah. Beberapa jenis vitamin B meliputi B1 (tiamin), B2 (riboflavin), B3 (niasin), B6 (piridoksin), B9 (asam folat), dan B12 (kobalamin)."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung vitamin b",
+            "patterns": [
+                "Apa saja makanan yang mengandung vitamin B?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung vitamin B?",
+                "Apa saja jenis makanan yang kaya akan vitamin B?",
+                "Bagaimana cara meningkatkan asupan vitamin B melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak vitamin B?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan vitamin B yang cukup?"
+            ],
+            "responses": [
+                "Vitamin B adalah kelompok vitamin yang penting untuk metabolisme energi, fungsi saraf, dan produksi sel darah merah. Beberapa jenis vitamin B meliputi B1 (tiamin), B2 (riboflavin), B3 (niasin), B6 (piridoksin), B9 (asam folat), dan B12 (kobalamin). Makanan yang kaya akan vitamin B termasuk daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian.",
+                "Tentu saja! Daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian merupakan contoh makanan yang mengandung banyak vitamin B.",
+                "Makanan yang kaya akan vitamin B meliputi daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian.",
+                "Anda dapat meningkatkan asupan vitamin B dengan mengonsumsi lebih banyak daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian dalam diet sehari-hari.",
+                "Ya, makanan sehat yang mengandung banyak vitamin B antara lain daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian.",
+                "Untuk memenuhi kebutuhan vitamin B, Anda bisa mengonsumsi daging, ikan, telur, susu, sayuran hijau, kacang-kacangan, dan biji-bijian secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "vitamin c",
+            "patterns": [
+                "Apa itu Vitamin C?",
+                "Vitamin c",
+                "vitamin c",
+                "apa fungsi Vitamin C?",
+                "mengapa kita butuh Vitamin C?",
+                "apa saja manfaat Vitamin C?"
+            ],
+            "responses": [
+                "Vitamin C adalah nutrisi penting yang diperlukan oleh tubuh untuk fungsi kekebalan, pertumbuhan jaringan, dan penyerapan zat besi."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung vitamin c",
+            "patterns": [
+                "Makanan apa saja yang mengandung vitamin C?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung vitamin C?",
+                "Apa saja jenis makanan yang kaya akan vitamin C?",
+                "Bagaimana cara meningkatkan asupan vitamin C melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak vitamin C?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan vitamin C yang cukup?"
+            ],
+            "responses": [
+                "Beberapa makanan yang kaya akan vitamin C antara lain jeruk, stroberi, paprika merah, kiwi, dan brokoli.",
+                "Tentu saja! Jeruk, stroberi, paprika merah, kiwi, dan brokoli merupakan contoh makanan yang mengandung banyak vitamin C.",
+                "Makanan yang kaya akan vitamin C meliputi buah-buahan seperti jeruk dan stroberi, serta sayuran seperti paprika merah dan brokoli.",
+                "Anda dapat meningkatkan asupan vitamin C dengan mengonsumsi lebih banyak buah-buahan seperti jeruk dan kiwi, serta sayuran hijau seperti brokoli.",
+                "Ya, makanan sehat yang mengandung banyak vitamin C antara lain jeruk, stroberi, paprika merah, kiwi, dan brokoli.",
+                "Untuk memenuhi kebutuhan vitamin C, Anda bisa mengonsumsi jeruk, stroberi, paprika merah, kiwi, dan brokoli secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "protein",
+            "patterns": [
+                "Apa itu protein?",
+                "Protein",
+                "protein",
+                "apa fungsi protein?",
+                "mengapa kita butuh protein?",
+                "apa saja manfaat protein?"
+            ],
+            "responses": [
+                "Protein adalah nutrisi penting yang dibutuhkan oleh tubuh untuk membangun dan memperbaiki jaringan, serta untuk fungsi enzimatik dan hormonal."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung protein",
+            "patterns": [
+                "Apa saja makanan yang mengandung protein?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung protein?",
+                "Apa saja jenis makanan yang kaya akan protein?",
+                "Bagaimana cara meningkatkan asupan protein melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak protein?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan protein yang cukup?"
+                       ],
+            "responses": [
+                "Protein adalah nutrisi penting yang dibutuhkan oleh tubuh untuk membangun dan memperbaiki jaringan, serta untuk fungsi enzimatik dan hormonal. Makanan yang kaya akan protein termasuk daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian.",
+                "Tentu saja! Daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian merupakan contoh makanan yang mengandung banyak protein.",
+                "Makanan yang kaya akan protein meliputi daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian.",
+                "Anda dapat meningkatkan asupan protein dengan mengonsumsi lebih banyak daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian dalam diet sehari-hari.",
+                "Ya, makanan sehat yang mengandung banyak protein antara lain daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian.",
+                "Untuk memenuhi kebutuhan protein, Anda bisa mengonsumsi daging, ikan, telur, susu, produk kedelai, kacang-kacangan, dan biji-bijian secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "karbohidrat",
+            "patterns": [
+                "Apa itu karbohidrat?",
+                "Karbohidrat",
+                "karbohidrat",
+                "apa fungsi karbohidrat?",
+                "mengapa kita butuh karbohidrat?",
+                "apa saja manfaat karbohidrat?"
+            ],
+            "responses": [
+                "Karbohidrat adalah salah satu jenis nutrisi utama yang diperlukan oleh tubuh untuk energi."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung karbohidrat",
+            "patterns": [
+                "Apa saja makanan yang mengandung karbohidrat?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung karbohidrat?",
+                "Apa saja jenis makanan yang kaya akan karbohidrat?",
+                "Bagaimana cara meningkatkan asupan karbohidrat melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak karbohidrat?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan karbohidrat yang cukup?"
+            ],
+            "responses": [
+                "Karbohidrat adalah salah satu jenis nutrisi utama yang diperlukan oleh tubuh untuk energi. Makanan yang kaya akan karbohidrat termasuk nasi, roti, pasta, kentang, sereal, dan buah-buahan.",
+                "Tentu saja! Nasi, roti, pasta, kentang, sereal, dan buah-buahan merupakan contoh makanan yang mengandung banyak karbohidrat.",
+                "Makanan yang kaya akan karbohidrat meliputi nasi, roti, pasta, kentang, sereal, dan buah-buahan.",
+                "Anda dapat meningkatkan asupan karbohidrat dengan mengonsumsi lebih banyak nasi, roti, pasta, kentang, sereal, dan buah-buahan dalam diet sehari-hari.",
+                "Ya, makanan sehat yang mengandung banyak karbohidrat antara lain nasi, roti, pasta, kentang, sereal, dan buah-buahan.",
+                "Untuk memenuhi kebutuhan karbohidrat, Anda bisa mengonsumsi nasi, roti, pasta, kentang, sereal, dan buah-buahan secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "lemak",
+            "patterns": [
+                "Apa itu lemak?",
+                "Lemak",
+                "lemak",
+                "apa fungsi lemak?",
+                "mengapa kita butuh lemak?",
+                "apa saja manfaat lemak?"
+            ],
+            "responses": [
+                "Lemak adalah salah satu jenis nutrisi yang penting untuk tubuh, digunakan sebagai sumber energi cadangan dan untuk penyerapan vitamin tertentu. Makanan yang kaya akan lemak termasuk minyak zaitun, alpukat, kacang-kacangan, ikan berlemak (seperti salmon), dan telur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "serat",
+            "patterns": [
+                "Apa itu serat?",
+                "Serat",
+                "serat",
+                "apa fungsi serat?",
+                "mengapa kita butuh serat?",
+                "apa saja manfaat serat?"
+            ],
+            "responses": [
+                "Serat adalah jenis zat yang ditemukan dalam makanan tumbuhan yang tidak dapat dicerna oleh tubuh manusia. Serat penting untuk menjaga kesehatan pencernaan dan mencegah sembelit."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung serat",
+            "patterns": [
+                "Apa saja makanan yang mengandung serat?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung serat?",
+                "Apa saja jenis makanan yang kaya akan serat?",
+                "Bagaimana cara meningkatkan asupan serat melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak serat?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan serat yang cukup?"
+            ],
+            "responses": [
+                "Serat adalah jenis zat yang ditemukan dalam makanan tumbuhan yang tidak dapat dicerna oleh tubuh manusia. Serat penting untuk menjaga kesehatan pencernaan dan mencegah sembelit. Makanan yang kaya akan serat termasuk sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh.",
+                "Tentu saja! Sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh merupakan contoh makanan yang mengandung banyak serat.",
+                "Makanan yang kaya akan serat termasuk sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh.",
+                "Anda dapat meningkatkan asupan serat dengan mengonsumsi lebih banyak sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh dalam diet sehari-hari.",
+                "Ya, makanan sehat yang mengandung banyak serat antara lain sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh.",
+                "Untuk memenuhi kebutuhan serat, Anda bisa mengonsumsi sayuran hijau, buah-buahan, kacang-kacangan, biji-bijian, dan gandum utuh secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "kalsium",
+            "patterns": [
+                "Apa itu kalsium?",
+                "Kalsium",
+                "kalsium",
+                "apa fungsi kalsium?",
+                "mengapa kita butuh kalsium?",
+                "apa saja manfaat kalsium?"
+            ],
+            "responses": [
+                "Kalsium adalah mineral yang penting untuk kesehatan tulang dan gigi. Kalsium juga berperan dalam kontraksi otot, pengaturan tekanan darah, dan fungsi saraf."
+            ],
+            "context": [
+                ""
+            ]
+        },
+        {
+            "tag": "mengandung kalsium",
+            "patterns": [
+                "Apa saja makanan yang mengandung kalsium?",
+                "Bisakah Anda sebutkan beberapa makanan yang mengandung kalsium?",
+                "Apa saja jenis makanan yang kaya akan kalsium?",
+                "Bagaimana cara meningkatkan asupan kalsium melalui makanan?",
+                "Adakah rekomendasi makanan yang sehat dan mengandung banyak kalsium?",
+                "Apakah Anda tahu makanan yang bisa memberikan asupan kalsium yang cukup?"
+            ],
+            "responses": [
+                "Kalsium adalah mineral yang penting untuk kesehatan tulang dan gigi. Kalsium juga berperan dalam kontraksi otot, pengaturan tekanan darah, dan fungsi saraf. Makanan yang kaya akan kalsium termasuk susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan.",
+                "Tentu saja! Susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan merupakan contoh makanan yang mengandung banyak kalsium.",
+                "Makanan yang kaya akan kalsium meliputi susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan.",
+                "Anda dapat meningkatkan asupan kalsium dengan mengonsumsi lebih banyak susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan dalam diet sehari-hari.",
+                "Ya, makanan sehat yang mengandung banyak kalsium antara lain susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan.",
+                "Untuk memenuhi kebutuhan kalsium, Anda bisa mengonsumsi susu, yogurt, keju, sayuran berdaun hijau seperti bayam, ikan teri, dan kacang-kacangan secara teratur."
+            ],
+            "context": [
+                ""
+            ]
+        }
+    ]
+}
