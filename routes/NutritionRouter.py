@@ -26,13 +26,17 @@ async def read_food_all(db: Session = Depends(get_db)):
 @NutritionRouter.get("/foods/nutrition", status_code=status.HTTP_200_OK)
 async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
     """Get nutrition details by food name."""
-    food = db.query(Food).filter(Food.food_name == food_name).first()
-    if not food:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Food not found")
+    food_with_nutrition = (
+        db.query(Food, Nutrition)
+        .join(Nutrition, Food.food_id == Nutrition.food_id)
+        .filter(Food.food_name == food_name)
+        .first()
+    )
 
-    nutrition_details = db.query(Nutrition).filter(Nutrition.food_id == food.food_id).first()
-    if not nutrition_details:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nutrition details not found")
+    if not food_with_nutrition:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Food or nutrition details not found")
+
+    food, nutrition_details = food_with_nutrition
 
     return APIResponse(
         code=status.HTTP_200_OK,
@@ -43,6 +47,9 @@ async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
             "nutrition_details": {
                 "energy": nutrition_details.energy,
                 "total_fat": nutrition_details.total_fat,
+                "saturated_fat": nutrition_details.saturated_fat,
+                "polyunsaturated_fat": nutrition_details.polyunsaturated_fat,
+                "sugar": nutrition_details.sugar,
                 "vitamin_A": nutrition_details.vitamin_A,
                 "vitamin_B1": nutrition_details.vitamin_B1,
                 "vitamin_B2": nutrition_details.vitamin_B2,
