@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, BigInteger, ForeignKey, CHAR
+
 from .Base import Base
 from .User import User
+
 
 class OTP(Base):
     __tablename__ = "otps"
