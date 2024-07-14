@@ -9,15 +9,15 @@ from utils.OTP import generate_otp, send_otp_email, pwd_context
 
 OTPRouter = APIRouter()
 
-
+# Helper function to convert datetime to timestamp
 def datetime_to_timestamp(dt):
     return int(dt.timestamp())
 
-
+# Helper function to convert timestamp to datetime
 def timestamp_to_datetime(ts):
     return datetime.fromtimestamp(ts, tz=timezone.utc)
 
-
+# Endpoint to handle forgot password requests
 @OTPRouter.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()
@@ -27,7 +27,7 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
     # Delete previous OTPs for the user
     db.query(models.OTP).filter(models.OTP.user_id == user.user_id).delete()
 
-    # Generate and store OTP in databases
+    # Generate and store OTP in the database
     otp = generate_otp()
     expire_time = datetime.now(timezone.utc) + timedelta(minutes=3)
     db_otp = models.OTP(user_id=user.user_id, otp_code=otp, expires_at=datetime_to_timestamp(expire_time))
@@ -46,7 +46,7 @@ async def forgot_password(request: ForgotPasswordRequest = Body(...), db: Sessio
         message="OTP sent to your email"
     )
 
-
+# Endpoint to verify OTP and reset password
 @OTPRouter.post("/verify-otp", status_code=status.HTTP_200_OK)
 async def verify_otp(request: OTPVerificationRequest = Body(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()

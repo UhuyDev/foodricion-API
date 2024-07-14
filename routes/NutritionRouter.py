@@ -7,9 +7,9 @@ from database.dtos import APIResponse
 NutritionRouter = APIRouter()
 
 
+# Endpoint to retrieve all food data
 @NutritionRouter.get("/foods", status_code=status.HTTP_200_OK)
 async def read_food_all(db: Session = Depends(get_db)):
-    """Get all food data."""
     food_all = db.query(Food).all()
     return APIResponse(
         code=status.HTTP_200_OK,
@@ -23,16 +23,16 @@ async def read_food_all(db: Session = Depends(get_db)):
     )
 
 
+# Endpoint to retrieve nutrition details by food name
 @NutritionRouter.get("/foods/nutrition", status_code=status.HTTP_200_OK)
 async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
-    """Get nutrition details by food name."""
     food_with_nutrition = (
         db.query(Food, Nutrition)
         .join(Nutrition, Food.food_id == Nutrition.food_id)
         .filter(Food.food_name == food_name)
         .first()
     )
-
+    # Check if the food item with nutrition exists in the database
     if not food_with_nutrition:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Food or nutrition details not found")
 

@@ -5,22 +5,47 @@ from database.dtos import UserCreateResponse, ProfileUpdateRequest, PasswordChan
 from models import User
 from utils.Security import get_current_user, verify_password, pwd_context
 
+# Initialize the APIRouter for user-related operations
 UserRouter = APIRouter()
 
 
+# Route to get the current user's details
 @UserRouter.get("/me", response_model=UserCreateResponse)
 async def read_current_user(current_user: User = Depends(get_current_user)):
+    """
+    Retrieve the current user's details.
+
+    Args:
+        current_user (User): The current authenticated user.
+
+    Returns:
+        UserCreateResponse: The user's fullname and email.
+    """
     return UserCreateResponse(fullname=current_user.fullname, email=current_user.email)
 
 
+# Route to update the current user's profile
 @UserRouter.post("/me/update-profile", status_code=status.HTTP_200_OK)
 async def update_profile(profile_update_request: ProfileUpdateRequest,
                          current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Update the current user's profile.
+
+    Args:
+        profile_update_request (ProfileUpdateRequest): The request containing the new profile details.
+        current_user (User): The current authenticated user.
+        db (Session): The database session.
+
+    Returns:
+        APIResponse: A response indicating the profile was updated successfully.
+    """
+    # Check if the new email is already registered by another user
     if current_user.email != profile_update_request.email:
         existing_user = db.query(User).filter(User.email == profile_update_request.email).first()
         if existing_user:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
+    # Update the user's profile details
     current_user.fullname = profile_update_request.full_name
     current_user.email = profile_update_request.email
     db.commit()
@@ -36,12 +61,26 @@ async def update_profile(profile_update_request: ProfileUpdateRequest,
     )
 
 
+# Route to change the current user's password
 @UserRouter.post("/me/change-password", status_code=status.HTTP_200_OK)
 async def change_password(password_change_request: PasswordChangeRequest,
                           current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Change the current user's password.
+
+    Args:
+        password_change_request (PasswordChangeRequest): The request containing the old and new passwords.
+        current_user (User): The current authenticated user.
+        db (Session): The database session.
+
+    Returns:
+        APIResponse: A response indicating the password was changed successfully.
+    """
+    # Verify the old password
     if not verify_password(password_change_request.old_password, current_user.password_hash):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Old password is incorrect")
 
+    # Hash the new password and update it in the database
     new_hashed_password = pwd_context.hash(password_change_request.new_password)
     current_user.password_hash = new_hashed_password
     db.commit()

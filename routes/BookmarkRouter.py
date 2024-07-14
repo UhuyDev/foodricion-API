@@ -7,12 +7,13 @@ from utils.Security import get_current_user
 
 BookmarkRouter = APIRouter()
 
-
+# Endpoint to retrieve all bookmarks for the current user
 @BookmarkRouter.get("/bookmarks", status_code=status.HTTP_200_OK)
 async def get_bookmarks(
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
+    # Query the database to get bookmarks along with associated food and nutrition data
     bookmarks = (
         db.query(FoodBookmark, Food, Nutrition)
         .join(Food, Food.food_id == FoodBookmark.food_id)
@@ -21,9 +22,11 @@ async def get_bookmarks(
         .all()
     )
 
+    # If no bookmarks are found, raise an HTTPException
     if not bookmarks:
         raise HTTPException(status_code=404, detail='Bookmarks not found for this user')
 
+    # Prepare the data to be returned
     bookmark_data = []
     for bookmark in bookmarks:
         if bookmark.Food and bookmark.Nutrition:
@@ -62,18 +65,20 @@ async def get_bookmarks(
         data=bookmark_data
     )
 
-
+# Endpoint to create a new bookmark for the current user
 @BookmarkRouter.post("/bookmarks/", status_code=status.HTTP_201_CREATED)
 async def create_bookmark(
         bookmark_request: BookmarkCreateRequest,
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
+    # Check if the food item exists in the database
     food_item = db.query(Food).filter(Food.food_name == bookmark_request.food_name).first()
 
     if not food_item:
         raise HTTPException(status_code=404, detail="Food item not found")
 
+    # Create a new bookmark entry in the database
     db_bookmark = FoodBookmark(
         user_id=current_user.user_id,
         food_id=food_item.food_id
@@ -92,13 +97,14 @@ async def create_bookmark(
         }
     )
 
-
+# Endpoint to delete a bookmark for the current user
 @BookmarkRouter.delete("/bookmarks/", status_code=status.HTTP_200_OK)
 async def delete_bookmark(
         bookmark_delete_request: BookmarkDeleteRequest,
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
+    # Check if the bookmark exists and belongs to the current user
     bookmark = db.query(FoodBookmark).filter(
         FoodBookmark.bookmark_id == bookmark_delete_request.bookmark_id,
         FoodBookmark.user_id == current_user.user_id
@@ -107,6 +113,7 @@ async def delete_bookmark(
     if not bookmark:
         raise HTTPException(status_code=404, detail="Bookmark not found")
 
+    # Delete the bookmark from the database
     db.delete(bookmark)
     db.commit()
 

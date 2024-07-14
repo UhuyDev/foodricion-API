@@ -9,8 +9,10 @@ from utils.Security import get_current_user
 ChatbotRouter = APIRouter()
 
 
-@ChatbotRouter.post("/chatbot")
+# Endpoint to interact with the chatbot
+@ChatbotRouter.post("/chatbot", status_code=status.HTTP_200_OK)
 async def chat(request: ChatRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Get the chatbot's response to the user's input
     response = await chatbot_response(request.user_input)
 
     # Save the chat to the database
@@ -24,19 +26,23 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
     db.refresh(chat_entry)
 
     return APIResponse(
-        code=200,
+        code=status.HTTP_200_OK,
         message="Success",
         data={"response": response}
     )
 
 
+# Endpoint to retrieve the chatbot history for the current user
 @ChatbotRouter.get("/chatbot-history", status_code=status.HTTP_200_OK)
 async def read_chatbot_history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Query the database for the chatbot history of the current user, ordered by timestamp in descending order
     chatbot_history = db.query(ChatbotConversation).filter(
         ChatbotConversation.user_id == current_user.user_id).order_by(
         ChatbotConversation.timestamp.desc()).all()
+
+    # If no chatbot history is found, raise an HTTPException
     if not chatbot_history:
-        raise HTTPException(status_code=404, detail='Chatbot history not found for this user')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Chatbot history not found for this user')
 
     # Convert the chatbot history to a list of dictionaries
     chatbot_history_data = [
@@ -50,7 +56,7 @@ async def read_chatbot_history(current_user: User = Depends(get_current_user), d
     ]
 
     return APIResponse(
-        code=200,
+        code=status.HTTP_200_OK,
         message="Chatbot history retrieved successfully",
         data=chatbot_history_data
     )

@@ -10,24 +10,35 @@ from database.Engine import get_db
 from models import User, Token
 import uuid
 
+# Load environment variables from .env file
 load_dotenv()
+
+# Retrieve secret key and algorithm from environment variables
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = "HS256"
+
+# Define token expiration times
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
+# Initialize password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Initialize OAuth2 password bearer scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
+# Function to convert datetime to timestamp
 def datetime_to_timestamp(dt):
     return int(dt.timestamp())
 
 
+# Function to convert timestamp to datetime
 def timestamp_to_datetime(ts):
     return datetime.fromtimestamp(ts, tz=timezone.utc)
 
 
+# Function to create an access token
 def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
@@ -36,6 +47,7 @@ def create_access_token(data: dict, expires_delta: timedelta):
     return encoded_jwt
 
 
+# Function to create a refresh token
 def create_refresh_token(user_id: str, db: Session):
     token_id = str(uuid.uuid4())
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
@@ -52,6 +64,7 @@ def create_refresh_token(user_id: str, db: Session):
     return refresh_token
 
 
+# Function to verify a refresh token
 def verify_refresh_token(token: str, db: Session):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -66,10 +79,12 @@ def verify_refresh_token(token: str, db: Session):
         return None
 
 
+# Function to verify a password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
+# Function to authenticate a user
 def authenticate_user(email: str, password: str, db: Session):
     user = db.query(User).filter(User.email == email).first()
     if user and verify_password(password, user.password_hash):
@@ -77,6 +92,7 @@ def authenticate_user(email: str, password: str, db: Session):
     return None
 
 
+# Function to get the current user based on the token
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

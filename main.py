@@ -31,15 +31,18 @@ def welcome():
     return "foodricion-api is working"
 
 
+# Startup event to start the scheduler
 @app.on_event("startup")
 def startup_event():
     start_scheduler()
 
 
+# Shutdown event to stop the scheduler
 @app.on_event("shutdown")
 def shutdown_event():
     shutdown_scheduler()
 
 
+# Run the application using uvicorn
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

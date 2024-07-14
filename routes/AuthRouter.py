@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database.Engine import get_db
@@ -14,6 +13,7 @@ from utils.Security import create_access_token, create_refresh_token, authentica
 AuthRouter = APIRouter()
 
 
+# Endpoint to register a new user
 @AuthRouter.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -30,13 +30,14 @@ async def register_user(user_data: UserCreateRequest, db: Session = Depends(get_
     db.commit()
     db.refresh(db_user)
 
-    return  APIResponse(
+    return APIResponse(
         code=status.HTTP_201_CREATED,
         message="Registration success",
         data=UserCreateResponse(fullname=db_user.fullname, email=db_user.email)
-    ) 
+    )
 
 
+# Endpoint to log in and get access token
 @AuthRouter.post("/login")
 async def login_for_access_token(login_data: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(login_data.email, login_data.password, db)
@@ -54,8 +55,8 @@ async def login_for_access_token(login_data: LoginRequest, db: Session = Depends
         data={"sub": str(user.user_id)}, expires_delta=access_token_expires
     )
     refresh_token = create_refresh_token(user.user_id, db)
-    
-    return  APIResponse(
+
+    return APIResponse(
         code=status.HTTP_200_OK,
         message="Login success",
         data={
@@ -63,9 +64,10 @@ async def login_for_access_token(login_data: LoginRequest, db: Session = Depends
             "refresh_token": refresh_token,
             "expired_at": int(access_token_expired_at.timestamp())
         }
-    ) 
+    )
 
 
+# Endpoint to refresh access token using a refresh token
 @AuthRouter.post("/refresh-token")
 async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)):
     db_token = verify_refresh_token(refresh_token, db)
@@ -86,10 +88,10 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     # Create a new refresh token
     new_refresh_token = create_refresh_token(db_token.user_id, db)
 
-    # delete the old refresh token from the database
+    # Delete the old refresh token from the database
     db.query(Token).filter(Token.token == refresh_token).delete()
     db.commit()
-    
+
     return APIResponse(
         code=status.HTTP_200_OK,
         message="Token refresh success",
@@ -98,5 +100,4 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
             "refresh_token": new_refresh_token,
             "expired_at": int(access_token_expired_at.timestamp())
         }
-    ) 
-    
+    )
