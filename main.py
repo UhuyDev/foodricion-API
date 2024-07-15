@@ -7,8 +7,7 @@ from middlewares.ResponseMiddleware import ResponseMiddleware
 from tasks.scheduler import start_scheduler, shutdown_scheduler
 
 # Initialize FastAPI application
-app = FastAPI()
-
+app = FastAPI(docs_url=None, redoc_url=None)
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
 

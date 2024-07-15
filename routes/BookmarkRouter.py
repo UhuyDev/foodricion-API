@@ -7,6 +7,7 @@ from utils.Security import get_current_user
 
 BookmarkRouter = APIRouter()
 
+
 # Endpoint to retrieve all bookmarks for the current user
 @BookmarkRouter.get("/bookmarks", status_code=status.HTTP_200_OK)
 async def get_bookmarks(
@@ -65,6 +66,7 @@ async def get_bookmarks(
         data=bookmark_data
     )
 
+
 # Endpoint to create a new bookmark for the current user
 @BookmarkRouter.post("/bookmarks/", status_code=status.HTTP_201_CREATED)
 async def create_bookmark(
@@ -96,6 +98,7 @@ async def create_bookmark(
             "bookmark_date": db_bookmark.bookmark_date,
         }
     )
+
 
 # Endpoint to delete a bookmark for the current user
 @BookmarkRouter.delete("/bookmarks/", status_code=status.HTTP_200_OK)

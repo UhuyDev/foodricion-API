@@ -50,7 +50,7 @@ async def read_chatbot_history(current_user: User = Depends(get_current_user), d
             "user_id": chatbot.user_id,
             "message": chatbot.message,
             "response": chatbot.response,
-            "timestamp": chatbot.timestamp.isoformat() if chatbot.timestamp else None
+            "timestamp": chatbot.timestamp
         }
         for chatbot in chatbot_history
     ]
