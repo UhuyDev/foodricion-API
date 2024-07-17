@@ -40,9 +40,9 @@ async def read_chatbot_history(current_user: User = Depends(get_current_user), d
         ChatbotConversation.user_id == current_user.user_id).order_by(
         ChatbotConversation.timestamp.desc()).all()
 
-    # If no chatbot history is found, raise an HTTPException
-    if not chatbot_history:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Chatbot history not found for this user')
+    # # If no chatbot history is found, raise an HTTPException
+    # if not chatbot_history:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Chatbot history not found for this user')
 
     # Convert the chatbot history to a list of dictionaries
     chatbot_history_data = [
