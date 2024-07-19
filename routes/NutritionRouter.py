@@ -7,19 +7,29 @@ from database.dtos import APIResponse
 NutritionRouter = APIRouter()
 
 
-# Endpoint to retrieve all food data
+# Endpoint to retrieve all food data with energy (calories) from nutrition table
 @NutritionRouter.get("/foods", status_code=status.HTTP_200_OK)
 async def read_food_all(db: Session = Depends(get_db)):
-    food_all = db.query(Food).all()
-    return APIResponse(
-        code=status.HTTP_200_OK,
-        message="All food data retrieved successfully",
-        data=[{
+    food_all = (
+        db.query(Food, Nutrition.energy)
+        .join(Nutrition, Food.food_id == Nutrition.food_id)
+        .all()
+    )
+
+    data = []
+    for food, energy in food_all:
+        data.append({
             "food_id": food.food_id,
             "food_name": food.food_name,
             "food_image": food.food_image,
-            "food_type": food.food_type
-        } for food in food_all]
+            "food_type": food.food_type,
+            "food_calories": energy
+        })
+
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="All food data retrieved successfully",
+        data=data
     )
 
 
