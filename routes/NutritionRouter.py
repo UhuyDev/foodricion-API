@@ -54,6 +54,8 @@ async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
         data={
             "food_id": food.food_id,
             "food_name": food.food_name,
+            "food_image": food.food_image,
+            "food_type": food.food_type,
             "nutrition_details": {
                 "energy": nutrition_details.energy,
                 "total_fat": nutrition_details.total_fat,
