@@ -1,5 +1,6 @@
 from .Base import Base
 from .User import User
+from .UserDetail import UserDetail
 from .ChatbotConversation import ChatbotConversation
 from .Food import Food
 from .Nutrition import Nutrition

@@ -10,4 +10,4 @@ class FoodBookmark(Base):
     bookmark_id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
     user_id = Column(CHAR(36), ForeignKey("users.user_id"), index=True)
     food_id = Column(Integer, ForeignKey("food.food_id"), index=True)
-    bookmark_date = Column(DateTime, default=datetime.now(timezone.utc))
+    bookmark_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))

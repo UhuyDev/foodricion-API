@@ -12,4 +12,4 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     fullname = Column(String(255), nullable=False)
-    registration_date = Column(DateTime, default=datetime.now(timezone.utc))
+    registration_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))

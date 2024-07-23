@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from database.Engine import get_db
-from database.dtos import UserCreateResponse, ProfileUpdateRequest, PasswordChangeRequest, APIResponse
-from models import User
+from database.dtos import ProfileUpdateRequest, PasswordChangeRequest, APIResponse, \
+    UserDetailUpdateRequest
+from models import User, UserDetail
 from utils.Security import get_current_user, verify_password, pwd_context
 
 # Initialize the APIRouter for user-related operations
@@ -10,9 +12,55 @@ UserRouter = APIRouter()
 
 
 # Route to get the current user's details
-@UserRouter.get("/me", response_model=UserCreateResponse)
-async def read_current_user(current_user: User = Depends(get_current_user)):
-    return UserCreateResponse(fullname=current_user.fullname, email=current_user.email)
+@UserRouter.get("/me")
+async def read_current_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.user_id).first()
+
+    if user_detail:
+        data = {
+            "fullname": current_user.fullname,
+            "email": current_user.email,
+            "age": user_detail.age,
+            "height": user_detail.height,
+            "weight": user_detail.weight
+        }
+    else:
+        data = {
+            "fullname": current_user.fullname,
+            "email": current_user.email
+        }
+
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="User details retrieved successfully",
+        data=data
+    )
+
+
+# Route to update the current user's metrics (UserDetail)
+@UserRouter.post("/me/update-metrics", status_code=status.HTTP_200_OK)
+async def update_metrics(user_detail_update_request: UserDetailUpdateRequest,
+                         current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.user_id).first()
+    if not user_detail:
+        user_detail = UserDetail(user_id=current_user.user_id)
+        db.add(user_detail)
+
+    user_detail.age = user_detail_update_request.age
+    user_detail.height = user_detail_update_request.height
+    user_detail.weight = user_detail_update_request.weight
+    db.commit()
+    db.refresh(user_detail)
+
+    return APIResponse(
+        code=status.HTTP_200_OK,
+        message="Metrics updated successfully",
+        data={
+            "age": user_detail.age,
+            "height": user_detail.height,
+            "weight": user_detail.weight
+        }
+    )
 
 
 # Route to update the current user's profile
