@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 from database.Engine import get_db
 from database.dtos import ProfileUpdateRequest, PasswordChangeRequest, APIResponse, \
-    UserDetailUpdateRequest
-from models import User, UserDetail
+    UserMetricsUpdateRequest
+from models import User, UserMetrics
 from utils.Security import get_current_user, verify_password, pwd_context
 
 # Initialize the APIRouter for user-related operations
@@ -14,15 +14,15 @@ UserRouter = APIRouter()
 # Route to get the current user's details
 @UserRouter.get("/me")
 async def read_current_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.user_id).first()
+    user_metrics = db.query(UserMetrics).filter(UserMetrics.user_id == current_user.user_id).first()
 
-    if user_detail:
+    if user_metrics:
         data = {
             "fullname": current_user.fullname,
             "email": current_user.email,
-            "age": user_detail.age,
-            "height": user_detail.height,
-            "weight": user_detail.weight
+            "age": user_metrics.age,
+            "height": user_metrics.height,
+            "weight": user_metrics.weight
         }
     else:
         data = {
@@ -39,26 +39,26 @@ async def read_current_user(current_user: User = Depends(get_current_user), db: 
 
 # Route to update the current user's metrics (UserDetail)
 @UserRouter.post("/me/update-metrics", status_code=status.HTTP_200_OK)
-async def update_metrics(user_detail_update_request: UserDetailUpdateRequest,
+async def update_metrics(user_metrics_update_request: UserMetricsUpdateRequest,
                          current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.user_id).first()
-    if not user_detail:
-        user_detail = UserDetail(user_id=current_user.user_id)
-        db.add(user_detail)
+    user_metrics = db.query(UserMetrics).filter(UserMetrics.user_id == current_user.user_id).first()
+    if not user_metrics:
+        user_metrics = UserMetrics(user_id=current_user.user_id)
+        db.add(user_metrics)
 
-    user_detail.age = user_detail_update_request.age
-    user_detail.height = user_detail_update_request.height
-    user_detail.weight = user_detail_update_request.weight
+    user_metrics.age = user_metrics_update_request.age
+    user_metrics.height = user_metrics_update_request.height
+    user_metrics.weight = user_metrics_update_request.weight
     db.commit()
-    db.refresh(user_detail)
+    db.refresh(user_metrics)
 
     return APIResponse(
         code=status.HTTP_200_OK,
         message="Metrics updated successfully",
         data={
-            "age": user_detail.age,
-            "height": user_detail.height,
-            "weight": user_detail.weight
+            "age": user_metrics.age,
+            "height": user_metrics.height,
+            "weight": user_metrics.weight
         }
     )
 
