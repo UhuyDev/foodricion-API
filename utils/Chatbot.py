@@ -27,6 +27,9 @@ except Exception as e:
 
 
 def preprocess_input(text):
+    # Convert the input text to lowercase
+    text = text.lower()
+
     # Tokenize the input text
     tokens = text.split()
 
