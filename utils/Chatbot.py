@@ -1,9 +1,13 @@
 import json
 import pickle
-import random
 import numpy as np
 import tensorflow as tf
 from fastapi import HTTPException
+from transformers import TFBertModel, BertTokenizer
+
+# Initialize BERT tokenizer and model
+tokenizer = BertTokenizer.from_pretrained("cahya/bert-base-indonesian-522M")
+bert_model = TFBertModel.from_pretrained("cahya/bert-base-indonesian-522M")
 
 # Load the chatbot model and related files
 try:
@@ -14,10 +18,6 @@ try:
     with open('chatbotmodel/classes.pkl', 'rb') as f:
         classes = pickle.load(f)
 
-    # Load the list of words from a pickle file
-    with open('chatbotmodel/words.pkl', 'rb') as f:
-        words = pickle.load(f)
-
     # Load the intents from a JSON file
     with open('chatbotmodel/intents.json', 'r') as f:
         intents = json.load(f)
@@ -26,34 +26,29 @@ except Exception as e:
     raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-def preprocess_input(text):
-    # Convert the input text to lowercase
-    text = text.lower()
-
-    # Tokenize the input text
-    tokens = text.split()
-
-    # Create a bag of words representation
-    bag = np.zeros(len(words), dtype=int)
-    for word in tokens:
-        if word in words:
-            bag[words.index(word)] = 1
-    return np.array([bag])
+def get_bert_embeddings(texts):
+    inputs = tokenizer(texts, return_tensors='tf', padding=True, truncation=True)
+    outputs = bert_model(**inputs)
+    last_hidden_state = outputs.last_hidden_state
+    mean_embeddings = tf.reduce_mean(last_hidden_state, axis=1)
+    return mean_embeddings.numpy()
 
 
 async def chatbot_response(user_input):
-    # Preprocess the user input to create a bag of words
-    processed_input = preprocess_input(user_input)
+    # Get BERT embeddings for the input sentence
+    embeddings = get_bert_embeddings([user_input])
+    # Reshape embeddings to match model input shape (batch_size, time_steps, features)
+    embeddings = np.expand_dims(embeddings, axis=1)  # Shape (1, 1, 768)
 
-    # Predict the class of the input using the loaded model
-    prediction = model.predict(processed_input)
+    # Make prediction
+    prediction = model.predict(embeddings)
     predicted_class = np.argmax(prediction)
     response_class = classes[predicted_class]
 
     # Find the corresponding intent and return a random response
     for intent in intents['intents']:
         if intent['tag'] == response_class:
-            return random.choice(intent['responses'])
+            return np.random.choice(intent['responses'])
 
     # Return a default message if the input doesn't match any intent
     return ("Kata-kata tersebut diluar kemampuan kami. Silakan tanyakan sesuatu yang berhubungan dengan nutrisi atau "
