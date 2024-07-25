@@ -9,7 +9,7 @@ from utils.FoodRecommedation import recommend_daily_food
 RecommendationRouter = APIRouter()
 
 
-@RecommendationRouter.get("/recommend", status_code=status.HTTP_200_OK)
+@RecommendationRouter.get("/recommendations/daily", status_code=status.HTTP_200_OK)
 async def recommend_food(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         result = recommend_daily_food(current_user.user_id, db)
