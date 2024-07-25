@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, Float, ForeignKey
-
 from .Base import Base
 
 
@@ -11,17 +10,22 @@ class Nutrition(Base):
     total_fat = Column(Float)
     saturated_fat = Column(Float)
     polyunsaturated_fat = Column(Float)
+    cholesterol = Column(Float)
     sugar = Column(Float)
     vitamin_A = Column(Float)
     vitamin_B1 = Column(Float)
     vitamin_B2 = Column(Float)
     vitamin_B3 = Column(Float)
+    vitamin_B6 = Column(Float)
+    vitamin_B9 = Column(Float)
     vitamin_C = Column(Float)
+    vitamin_E = Column(Float)
     total_carbohydrate = Column(Float)
     protein = Column(Float)
     dietary_fiber = Column(Float)
     calcium = Column(Float)
     phosphorus = Column(Float)
+    magnesium = Column(Float)  # Added column
     sodium = Column(Float)
     potassium = Column(Float)
     copper = Column(Float)
