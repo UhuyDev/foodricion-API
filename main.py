@@ -18,6 +18,7 @@ app.include_router(routes.UserRouter)
 app.include_router(routes.NutritionRouter)
 app.include_router(routes.BookmarkRouter)
 app.include_router(routes.ChatbotRouter)
+app.include_router(routes.RecommendationRouter)
 
 # Include Middleware
 app.add_middleware(ResponseMiddleware)
