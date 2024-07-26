@@ -33,13 +33,13 @@ def welcome():
 
 # Startup event to start the scheduler
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     start_scheduler()
 
 
 # Shutdown event to stop the scheduler
 @app.on_event("shutdown")
-def shutdown_event():
+async def shutdown_event():
     shutdown_scheduler()
 
 
