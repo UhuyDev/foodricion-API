@@ -23,17 +23,19 @@ try:
         intents = json.load(f)
 except Exception as e:
     # Raise an HTTPException if there's an error loading the files
-    raise HTTPException(status_code=500, detail="Internal Server Error")
+    raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
+# Function to get BERT embeddings for a list of texts.
 def get_bert_embeddings(texts):
-    inputs = tokenizer(texts, return_tensors='tf', padding=True, truncation=True)
+    inputs = tokenizer(texts, return_tensors='tf', padding=True, truncation=True, max_length=512)
     outputs = bert_model(**inputs)
     last_hidden_state = outputs.last_hidden_state
     mean_embeddings = tf.reduce_mean(last_hidden_state, axis=1)
     return mean_embeddings.numpy()
 
 
+# Function to get a response from the chatbot for a given user input.
 async def chatbot_response(user_input):
     # Get BERT embeddings for the input sentence
     embeddings = get_bert_embeddings([user_input])
@@ -41,7 +43,7 @@ async def chatbot_response(user_input):
     embeddings = np.expand_dims(embeddings, axis=1)  # Shape (1, 1, 768)
 
     # Make prediction
-    prediction = model.predict(embeddings)
+    prediction = model.predict(embeddings, verbose=0)
     predicted_class = np.argmax(prediction)
     response_class = classes[predicted_class]
 
