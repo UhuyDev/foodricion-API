@@ -1,10 +1,7 @@
-# Import the necessary modules for scheduling tasks and database operations
+import models
 from datetime import datetime, timezone
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-
-import models
 from database.Engine import Sessionlocal
 
 

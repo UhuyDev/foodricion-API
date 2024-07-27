@@ -1,15 +1,12 @@
+import numpy as np
+import pandas as pd
+from collections import defaultdict
 from datetime import datetime, timezone
-
 from fastapi import HTTPException, status
+from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import StandardScaler
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import NearestNeighbors
-import pandas as pd
-import numpy as np
-from collections import defaultdict
-
 from models import UserMetrics, FoodBookmark, Nutrition, Food
 
 # Define the nutritional parameters for different age groups
@@ -33,12 +30,15 @@ NUTRITIONAL_PARAMETERS = {
 }
 
 
+# Function to get nutritional needs based on age
 def get_nutritional_needs(age):
     for age_range, params in NUTRITIONAL_PARAMETERS.items():
         if age_range[0] <= age <= age_range[1]:
             return params
     return None
 
+
+# Function to calculate nutrition target based on user's current nutrition and needs
 def nutrition_target(row, kebutuhan):
     return {
         'protein': kebutuhan['protein'] - row['protein'],
@@ -47,6 +47,8 @@ def nutrition_target(row, kebutuhan):
         'lemak': kebutuhan['lemak'] - row['lemak']
     }
 
+
+# Function to recommend daily food based on user's nutritional needs and consumption history
 def recommend_daily_food(user_id: str, db: Session):
     # Get user metrics
     user_metrics = db.query(UserMetrics).filter(UserMetrics.user_id == user_id).first()
@@ -54,29 +56,22 @@ def recommend_daily_food(user_id: str, db: Session):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User metrics not found")
 
     age = user_metrics.age
-    print(f"User age: {age}")
 
     nutritional_needs = get_nutritional_needs(age)
     if not nutritional_needs:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Age range not supported")
 
-    print(f"Nutritional needs: {nutritional_needs}")
-
     # Get today's date in UTC
     today = datetime.now(timezone.utc).date()
-    print(f"Today's date: {today}")
 
     # Get food bookmarks for the current day
     bookmarks = db.query(FoodBookmark).filter(FoodBookmark.user_id == user_id,
                                               func.date(FoodBookmark.bookmark_date) == today).all()
-    print(f"Number of bookmarks for today: {len(bookmarks)}")
 
     # Count occurrences of each food item in bookmarks
     food_count = defaultdict(int)
     for bookmark in bookmarks:
         food_count[bookmark.food_id] += 1
-
-    print(f"Food count: {food_count}")
 
     # Calculate total nutritional values consumed
     total_nutrition = {key: 0 for key in nutritional_needs.keys()}
@@ -88,22 +83,16 @@ def recommend_daily_food(user_id: str, db: Session):
             total_nutrition["karbohidrat"] += (nutrition.total_carbohydrate or 0) * count
             total_nutrition["lemak"] += (nutrition.total_fat or 0) * count
 
-    print(f"Total nutrition consumed: {total_nutrition}")
-
     # Calculate remaining nutritional needs
     remaining_nutrition = {key: max(nutritional_needs[key][1] - total_nutrition[key], 0) for key in
                            nutritional_needs.keys()}
-    print(f"Remaining nutritional needs: {remaining_nutrition}")
-    
+
     # Calculate the ratio of total nutrition consumed to minimum nutrition needs
     ratio_nutrition = {key: total_nutrition[key] / nutritional_needs[key][1] if nutritional_needs[key][1] > 0 else 0
                        for key in nutritional_needs.keys()}
-    print(f"Nutritional ratios: {ratio_nutrition}")
-
 
     # Determine which nutrient is most deficient based on the minimum ratio
     most_deficient_nutrient = min(ratio_nutrition, key=ratio_nutrition.get)
-    print(f"Most deficient nutrient: {most_deficient_nutrient}")
 
     # Check if all remaining nutritional needs are zero
     if all(value == 0 for value in remaining_nutrition.values()):
@@ -115,7 +104,6 @@ def recommend_daily_food(user_id: str, db: Session):
 
     # Get all food items
     food_all = db.query(Food, Nutrition).join(Nutrition, Food.food_id == Nutrition.food_id).all()
-    print(f"Number of food items: {len(food_all)}")
 
     data_list = []
     for food, nutrition in food_all:
@@ -124,23 +112,25 @@ def recommend_daily_food(user_id: str, db: Session):
             "protein": nutrition.protein,
             "serat": nutrition.dietary_fiber,
             "karbohidrat": nutrition.total_carbohydrate,
-            "lemak": nutrition.total_fat 
+            "lemak": nutrition.total_fat
         })
-        
+
     food_df = pd.DataFrame(data_list)
     food_df.fillna(0, inplace=True)
-    
+
     scaler = StandardScaler()
     nutrition = food_df[['protein', 'karbohidrat', 'serat', 'lemak']]
     nutrition_scaled = scaler.fit_transform(nutrition)
-    
-    food_data_scaled = pd.concat([food_df[['food_name']], pd.DataFrame(nutrition_scaled, columns=['protein', 'karbohidrat', 'serat', 'lemak'])], axis=1)
+
+    food_data_scaled = pd.concat(
+        [food_df[['food_name']], pd.DataFrame(nutrition_scaled, columns=['protein', 'karbohidrat', 'serat', 'lemak'])],
+        axis=1)
     food_data_scaled['target'] = food_data_scaled.apply(lambda row: nutrition_target(row, total_nutrition), axis=1)
-    
-    X = food_data_scaled[['protein', 'karbohidrat', 'serat', 'lemak']]
+
+    x = food_data_scaled[['protein', 'karbohidrat', 'serat', 'lemak']]
     model = NearestNeighbors(n_neighbors=5, algorithm='auto')
-    model.fit(X)
-    
+    model.fit(x)
+
     target_nutrition = np.array([
         remaining_nutrition.get("protein"),
         remaining_nutrition.get("serat"),
@@ -150,27 +140,8 @@ def recommend_daily_food(user_id: str, db: Session):
     distance, index = model.kneighbors([target_nutrition])
     recommended_foods = food_df.iloc[index[0]].to_dict(orient='records')
 
-    # print(f"Food DataFrame shape: {food_df.shape}")
-
-    # # Create a DataFrame for remaining nutritional needs
-    # needs_df = pd.DataFrame([remaining_nutrition])
-    # print(f"Needs DataFrame shape: {needs_df.shape}")
-
-    # # Calculate cosine similarity between food items and remaining nutritional needs
-    # similarity_scores = cosine_similarity(food_df[["Protein", "Serat", "Karbohidrat", "Lemak"]], needs_df)
-    # print(f"Similarity scores shape: {similarity_scores.shape}")
-
-    # # Get the most similar food items
-    # similar_food_indices = similarity_scores.argsort(axis=0)[-5:][::-1].flatten()
-    # print(f"Most similar food indices: {similar_food_indices}")
-
-    # recommended_foods = food_df.iloc[similar_food_indices]
-    # print(f"Recommended foods: {recommended_foods}")
-
     return {
         "status": "success",
         "message": "Recommended food items retrieved successfully",
         "data": recommended_foods
-        # "data": recommended_foods[["food_name", "Protein", "Serat", "Karbohidrat", "Lemak"]].to_dict(
-        #     orient="records")
     }
