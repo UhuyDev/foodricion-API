@@ -105,8 +105,12 @@ def recommend_daily_food(user_id: str, db: Session):
     # Get all food items
     food_all = db.query(Food, Nutrition).join(Nutrition, Food.food_id == Nutrition.food_id).all()
 
+    # Initialize an empty list to store the data
     data_list = []
+
+    # Iterate over each food item and its corresponding nutrition information
     for food, nutrition in food_all:
+        # Append a dictionary containing food name and its nutrition details to the data list
         data_list.append({
             'food_name': food.food_name,
             "protein": nutrition.protein,
@@ -115,31 +119,53 @@ def recommend_daily_food(user_id: str, db: Session):
             "lemak": nutrition.total_fat
         })
 
+    # Convert the list of dictionaries into a pandas DataFrame
     food_df = pd.DataFrame(data_list)
+
+    # Fill any NaN values in the DataFrame with 0
     food_df.fillna(0, inplace=True)
 
+    # Initialize a StandardScaler object to standardize the data
     scaler = StandardScaler()
+
+    # Select the columns related to nutrition for scaling
     nutrition = food_df[['protein', 'karbohidrat', 'serat', 'lemak']]
+
+    # Standardize the nutrition data
     nutrition_scaled = scaler.fit_transform(nutrition)
 
+    # Concatenate the food names with the scaled nutrition data to form a new DataFrame
     food_data_scaled = pd.concat(
         [food_df[['food_name']], pd.DataFrame(nutrition_scaled, columns=['protein', 'karbohidrat', 'serat', 'lemak'])],
         axis=1)
+
+    # Apply a function to calculate the target nutrition for each row and add it as a new column
     food_data_scaled['target'] = food_data_scaled.apply(lambda row: nutrition_target(row, total_nutrition), axis=1)
 
+    # Select the scaled nutrition columns for modeling
     x = food_data_scaled[['protein', 'karbohidrat', 'serat', 'lemak']]
+
+    # Initialize a NearestNeighbors model with 5 neighbors and automatic algorithm selection
     model = NearestNeighbors(n_neighbors=5, algorithm='auto')
+
+    # Fit the model with the scaled nutrition data
     model.fit(x)
 
+    # Create an array of the remaining target nutrition values
     target_nutrition = np.array([
         remaining_nutrition.get("protein"),
         remaining_nutrition.get("serat"),
         remaining_nutrition.get("karbohidrat"),
         remaining_nutrition.get("lemak")
     ])
+
+    # Find the 5 nearest neighbors to the target nutrition
     distance, index = model.kneighbors([target_nutrition])
+
+    # Retrieve the recommended food items based on the nearest neighbors' indices
     recommended_foods = food_df.iloc[index[0]].to_dict(orient='records')
 
+    # Return a dictionary containing the status, message, and recommended food items
     return {
         "status": "success",
         "message": "Recommended food items retrieved successfully",
