@@ -34,6 +34,7 @@ async def get_bookmarks(
             bookmark_data.append({
                 "bookmark": bookmark.FoodBookmark.bookmark_id,
                 "food": bookmark.Food.food_name,
+                "food_image": bookmark.Food.food_image,
                 "energy": bookmark.Nutrition.energy,
                 "total_fat": bookmark.Nutrition.total_fat,
                 "saturated_fat": bookmark.Nutrition.saturated_fat,
