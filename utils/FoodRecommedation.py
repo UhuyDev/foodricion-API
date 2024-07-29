@@ -113,6 +113,8 @@ def recommend_daily_food(user_id: str, db: Session):
         # Append a dictionary containing food name and its nutrition details to the data list
         data_list.append({
             'food_name': food.food_name,
+            "food_image": food.food_image,
+            "kalori": nutrition.energy,
             "protein": nutrition.protein,
             "serat": nutrition.dietary_fiber,
             "karbohidrat": nutrition.total_carbohydrate,

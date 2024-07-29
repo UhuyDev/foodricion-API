@@ -39,7 +39,7 @@ async def get_nutrition_by_name(food_name: str, db: Session = Depends(get_db)):
     food_with_nutrition = (
         db.query(Food, Nutrition)
         .join(Nutrition, Food.food_id == Nutrition.food_id)
-        .filter(Food.food_name == food_name)
+        .filter(Food.food_name.contains(food_name))
         .first()
     )
     # Check if the food item with nutrition exists in the database
